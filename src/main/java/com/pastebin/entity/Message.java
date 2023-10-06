@@ -31,23 +31,25 @@ public class Message {
     @Column(name = "is_deleted")
     private Boolean isDeleted = false;
 
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    @JoinColumn(name = "uid", referencedColumnName = "user_id")
-    private int uid;
-
-//    @ManyToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
-//    @JoinColumn(name = "uid", referencedColumnName = "user_id")
-//    private User user;
+//    @GeneratedValue(strategy = GenerationType.AUTO)
+//    @JoinColumn(name = "uid", referencedColumnName = "user_id") //todo uid is temporary deleted
+//    private Integer userId;
 
     public Message() {
     }
 
-    public Message(String message, ValidTime timestamp, int uid) {
+    public Message(String message, ValidTime timestamp
+//            , Integer uid
+    ) {
         this.setMessage(message);
 
         LocalDateTime ldt = LocalDateTime.now().plusHours(timestamp.getHoursDuration());
         this.deletionDate = Timestamp.from(ldt.atZone(ZoneId.systemDefault()).toInstant());
-        this.uid = uid;
+//        this.userId = uid;
+    }
+
+    public Message(String message) {
+        this.setMessage(message);
     }
 
     @Override
@@ -55,18 +57,25 @@ public class Message {
         if (this == o) return true;
         if (!(o instanceof Message that)) return false;
 
-        return uid == that.uid && Objects.equals(messageHashId, that.messageHashId) && Objects.equals(getMessage(), that.getMessage()) && Objects.equals(getDeletionDate(), that.getDeletionDate()) && Objects.equals(isDeleted, that.isDeleted);
+        return
+//                Objects.equals(userId, that.userId) &&
+                Objects.equals(messageHashId, that.messageHashId)
+                && Objects.equals(getMessage(), that.getMessage())
+                && Objects.equals(getDeletionDate(), that.getDeletionDate())
+                && Objects.equals(isDeleted, that.isDeleted);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(messageHashId, getMessage(), getDeletionDate(), isDeleted, uid);
+        return Objects.hash(messageHashId, getMessage(), getDeletionDate(), isDeleted
+//                , userId
+        );
     }
 
 
     public void setMessage(String message) {
         try {
-            this.messageHashId = Arrays.toString(MessageDigest.getInstance("SHA-256").digest(message.getBytes(UTF_8)));
+            this.messageHashId = new String((MessageDigest.getInstance("SHA-256").digest(message.getBytes(UTF_8))));
             this.message = message;
         } catch (NoSuchAlgorithmException e) {
             e.printStackTrace();
@@ -77,10 +86,6 @@ public class Message {
         return messageHashId;
     }
 
-    public void setMessageHashId(String messageHashId) {
-        this.messageHashId = messageHashId;
-    }
-
     public String getMessage() {
         return message;
     }
@@ -89,23 +94,15 @@ public class Message {
         return deletionDate;
     }
 
-    public void setDeletionDate(Timestamp deletionDate) {
-        this.deletionDate = deletionDate;
+    public Boolean getIsDeleted() {
+        return isDeleted; // todo do that all deleting will just mark messages as deleted, and later we will delete them with a planned task
     }
 
-    public Boolean getDeleted() {
-        return isDeleted;
-    }
-
-    public void setDeleted(Boolean deleted) {
+    public void setIsDeleted(Boolean deleted) {
         isDeleted = deleted;
     }
 
-    public int getUid() {
-        return uid;
-    }
-
-    public void setUid(int uid) {
-        this.uid = uid;
-    }
+//    public int getUserId() {
+//        return userId;
+//    }
 }
