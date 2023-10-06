@@ -1,6 +1,6 @@
 package com.pastebin.controller;
 
-import com.pastebin.dao.MessageAccessRepo;
+import com.pastebin.dao.services.MessageService;
 import com.pastebin.entity.Message;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -9,29 +9,21 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
-import java.util.NoSuchElementException;
-import java.util.Optional;
+import java.util.concurrent.ExecutionException;
 
 @Controller
 public class MappingController {
-    private final MessageAccessRepo messageService;
+    private final MessageService messageService;
 
     @Autowired
-    public MappingController(MessageAccessRepo messageService) {
+    public MappingController(MessageService messageService) {
         this.messageService = messageService;
     }
 
-    private Message retrieveMessageById(Long id) {
-        Optional<Message> message = messageService.findById(id);
-        if (message.isEmpty() || message.get().getDeleted()) {
-            throw new NoSuchElementException("Message with id " + id + " not found");
-        }
-        return message.get();
-    }
 
     @RequestMapping("/get-message")
     public String getMessage(Model model, @RequestParam Long id) {
-        Message message = retrieveMessageById(id);
+        Message message = messageService.findById(id);
         model.addAttribute("message", message);
 
         return "get_message";
@@ -54,8 +46,8 @@ public class MappingController {
     }
 
     @RequestMapping("/edit-message")
-    public String editMessage(Model model, @RequestParam String newContent, @RequestParam Long id) {
-        Message message = retrieveMessageById(id);
+    public String editMessage(Model model, @RequestParam String newContent, @RequestParam Long id) throws ExecutionException, InterruptedException {
+        Message message = messageService.findById(id);
         message.setValue(newContent);
         messageService.save(message);
 
@@ -64,9 +56,10 @@ public class MappingController {
     }
 
     @RequestMapping("delete-message")
-    public String deleteMessage(Model model, @RequestParam Long id) {
-        Message message = retrieveMessageById(id);
-        messageService.delete(message);
+    public String deleteMessage(Model model, @RequestParam Long id) throws ExecutionException, InterruptedException {
+        Message message = messageService.findById(id);
+        message.setDeleted(true);
+        messageService.save(message);
         model.addAttribute("message", message);
 
         return "get_message";
