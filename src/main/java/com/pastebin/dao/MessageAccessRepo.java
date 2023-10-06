@@ -7,6 +7,6 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 @Transactional
-public interface MessageAccessRepo extends JpaRepository<Message, String> {
+public interface MessageAccessRepo extends JpaRepository<Message, Long> {
 
 }

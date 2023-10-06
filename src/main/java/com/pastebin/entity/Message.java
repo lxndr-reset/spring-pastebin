@@ -1,108 +1,77 @@
 package com.pastebin.entity;
 
-import com.pastebin.entity.date.ValidTime;
 import jakarta.persistence.*;
 import org.springframework.stereotype.Component;
 
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.sql.Timestamp;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.util.Arrays;
 import java.util.Objects;
 
-import static java.nio.charset.StandardCharsets.UTF_8;
-
-@Table(name = "text")
 @Entity
+@Table(name = "message")
 @Component
 public class Message {
     @Id
-    @Column(name = "sha256_hash")
-    private String messageHashId;
+    @Column(name = "message_id")
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
-    @Column(name = "value")
-    private String message;
-
-    @Column(name = "deletion_date")
-    private Timestamp deletionDate;
+    @Column(name = "message_value")
+    private String value;
 
     @Column(name = "is_deleted")
     private Boolean isDeleted = false;
+//    @Column(name = "owner_id")
+//    private Integer ownerId;
 
-//    @GeneratedValue(strategy = GenerationType.AUTO)
-//    @JoinColumn(name = "uid", referencedColumnName = "user_id") //todo uid is temporary deleted
-//    private Integer userId;
+
+    public Message(String value) {
+        this.value = value;
+    }
 
     public Message() {
     }
 
-    public Message(String message, ValidTime timestamp
-//            , Integer uid
-    ) {
-        this.setMessage(message);
-
-        LocalDateTime ldt = LocalDateTime.now().plusHours(timestamp.getHoursDuration());
-        this.deletionDate = Timestamp.from(ldt.atZone(ZoneId.systemDefault()).toInstant());
-//        this.userId = uid;
+    public Long getId() {
+        return id;
     }
 
-    public Message(String message) {
-        this.setMessage(message);
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public String getValue() {
+        return value;
+    }
+
+    public void setValue(String value) {
+        this.value = value;
+    }
+
+    public Boolean getDeleted() {
+        return isDeleted;
+    }
+
+    public void setDeleted(Boolean deleted) {
+        isDeleted = deleted;
     }
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof Message that)) return false;
-
-        return
-//                Objects.equals(userId, that.userId) &&
-                Objects.equals(messageHashId, that.messageHashId)
-                && Objects.equals(getMessage(), that.getMessage())
-                && Objects.equals(getDeletionDate(), that.getDeletionDate())
-                && Objects.equals(isDeleted, that.isDeleted);
+        if (!(o instanceof Message message)) return false;
+        return Objects.equals(getId(), message.getId()) && Objects.equals(getValue(), message.getValue()) && Objects.equals(isDeleted, message.isDeleted);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(messageHashId, getMessage(), getDeletionDate(), isDeleted
-//                , userId
-        );
+        return Objects.hash(getId(), getValue(), isDeleted);
     }
 
-
-    public void setMessage(String message) {
-        try {
-            this.messageHashId = new String((MessageDigest.getInstance("SHA-256").digest(message.getBytes(UTF_8))));
-            this.message = message;
-        } catch (NoSuchAlgorithmException e) {
-            e.printStackTrace();
-        }
+    @Override
+    public String toString() {
+        return "Message{" +
+                "id=" + id +
+                ", value='" + value + '\'' +
+                ", isDeleted=" + isDeleted +
+                '}';
     }
-
-    public String getMessageHashId() {
-        return messageHashId;
-    }
-
-    public String getMessage() {
-        return message;
-    }
-
-    public Timestamp getDeletionDate() {
-        return deletionDate;
-    }
-
-    public Boolean getIsDeleted() {
-        return isDeleted; // todo do that all deleting will just mark messages as deleted, and later we will delete them with a planned task
-    }
-
-    public void setIsDeleted(Boolean deleted) {
-        isDeleted = deleted;
-    }
-
-//    public int getUserId() {
-//        return userId;
-//    }
 }

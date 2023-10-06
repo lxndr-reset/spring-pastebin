@@ -1,7 +1,5 @@
 package com.pastebin.exception;
 
-import java.util.Objects;
-
 public class UserBlockedException extends RuntimeException {
     public UserBlockedException(String message) {
         super(message);
