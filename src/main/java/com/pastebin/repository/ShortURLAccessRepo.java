@@ -10,4 +10,5 @@ import java.util.Optional;
 public interface ShortURLAccessRepo extends JpaRepository<ShortURL, Long> {
     long countAllByMessageNull();
     Optional<ShortURL> getFirstByMessageIsNullOrMessageDeletedIsTrue();
+    Optional<ShortURL> findByUrlValue(String value);
 }

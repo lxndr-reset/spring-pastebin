@@ -42,18 +42,17 @@ public class MessageService {
     public void deleteAllMessagesByDeleted(){
         messageAccessRepo.deleteAllByDeletedIsTrue();
     }
-    @Transactional
     public List<Message> findAll(){
         return messageAccessRepo.findAll();
     }
 
-    @Transactional
     public long countByDeletedIsFalse(){
         return messageAccessRepo.countByDeletedIsFalse();
     }
 
-    @Transactional
     public long countAllMessages(){
         return messageAccessRepo.count();
     }
+
+
 }

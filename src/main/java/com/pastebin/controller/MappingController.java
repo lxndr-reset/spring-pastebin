@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
@@ -27,6 +28,14 @@ public class MappingController {
     @RequestMapping("/get-message")
     public String getMessage(Model model, @RequestParam Long id) {
         Message message = messageService.findById(id);
+        model.addAttribute("message", message);
+
+        return "get_message";
+    }
+
+    @RequestMapping("/get-message/{value}")
+    public String getMessage(Model model, @PathVariable String value) {
+        Message message = shortURLService.findByUrlValue(value).getMessage();
         model.addAttribute("message", message);
 
         return "get_message";
@@ -61,7 +70,7 @@ public class MappingController {
         return "get_message";
     }
 
-    @RequestMapping("delete-message")
+    @RequestMapping("/delete-message")
     public String deleteMessage(Model model, @RequestParam Long id) {
         Message message = messageService.findById(id);
         message.setDeleted(true);

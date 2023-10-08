@@ -84,7 +84,6 @@ public class Message {
                 "id=" + id +
                 ", value='" + value + '\'' +
                 ", deleted=" + deleted +
-                ", shortURL=" + shortURL +
                 '}';
     }
 }

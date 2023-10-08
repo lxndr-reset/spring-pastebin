@@ -1,8 +1,8 @@
 package com.pastebin.service;
 
+import com.pastebin.entity.ShortURL;
 import com.pastebin.exception.NoAvailableShortURLException;
 import com.pastebin.repository.ShortURLAccessRepo;
-import com.pastebin.entity.ShortURL;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -37,19 +37,26 @@ public class ShortURLService {
     public long countAllByMessageNull() {
         return shortURLAccessRepo.countAllByMessageNull();
     }
-    public long count(){
+
+    public long count() {
         return shortURLAccessRepo.count();
     }
-    public List<ShortURL> saveAll(Iterable<ShortURL> urls){
+
+    public List<ShortURL> saveAll(Iterable<ShortURL> urls) {
         return shortURLAccessRepo.saveAll(urls);
     }
 
     public ShortURL getByMessageIsNullOrMessageDeleted() throws NoAvailableShortURLException {
         Optional<ShortURL> result = shortURLAccessRepo.getFirstByMessageIsNullOrMessageDeletedIsTrue();
 
-        if (result.isEmpty()){
+        if (result.isEmpty()) {
             throw new NoAvailableShortURLException("No urls are available! Generation starts now");
         }
         return result.get();
+    }
+
+    public ShortURL findByUrlValue(String value) {
+        return shortURLAccessRepo.findByUrlValue(value)
+                .orElseThrow(NoSuchElementException::new);
     }
 }

@@ -112,4 +112,12 @@ public class ShortURL {
         this.message = message;
     }
 
+    @Override
+    public String toString() {
+        return "ShortURL{" +
+                "urlId=" + urlId +
+                ", urlValue='" + urlValue + '\'' +
+                ", message=" + message +
+                '}';
+    }
 }
