@@ -18,16 +18,40 @@ public class Message {
     private String value;
 
     @Column(name = "is_deleted")
-    private Boolean isDeleted = false;
-//    @Column(name = "owner_id")
-//    private Integer ownerId;
+    private Boolean deleted = false;
 
+    @OneToOne (mappedBy = "message", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private ShortURL shortURL;
 
-    public Message(String value) {
+    public Message(String value, ShortURL url) {
         this.value = value;
+        this.shortURL = url;
     }
 
     public Message() {
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Message message)) return false;
+        return Objects.equals(getId(), message.getId())
+                && Objects.equals(getValue(), message.getValue())
+                && Objects.equals(deleted, message.deleted)
+                && Objects.equals(getShortURL(), message.getShortURL());
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(getId(), getValue(), deleted, getShortURL());
+    }
+
+    public ShortURL getShortURL() {
+        return shortURL;
+    }
+
+    public void setShortURL(ShortURL shortURL) {
+        this.shortURL = shortURL;
     }
 
     public Long getId() {
@@ -46,24 +70,12 @@ public class Message {
         this.value = value;
     }
 
-    public Boolean getDeleted() {
-        return isDeleted;
+    public Boolean isDeleted() {
+        return deleted;
     }
 
     public void setDeleted(Boolean deleted) {
-        isDeleted = deleted;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof Message message)) return false;
-        return Objects.equals(getId(), message.getId()) && Objects.equals(getValue(), message.getValue()) && Objects.equals(isDeleted, message.isDeleted);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(getId(), getValue(), isDeleted);
+        this.deleted = deleted;
     }
 
     @Override
@@ -71,7 +83,8 @@ public class Message {
         return "Message{" +
                 "id=" + id +
                 ", value='" + value + '\'' +
-                ", isDeleted=" + isDeleted +
+                ", deleted=" + deleted +
+                ", shortURL=" + shortURL +
                 '}';
     }
 }

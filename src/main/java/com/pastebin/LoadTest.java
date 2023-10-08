@@ -5,14 +5,33 @@ import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 public class LoadTest {
-    public static void main(String[] args) throws IOException, InterruptedException {
+
+
+//    private static void stringGenerator(StringBuilder string) {
+//        StringBuilder copy = new StringBuilder(string.toString());
+//
+//        for (char aChar : CHARS) {
+//            string = new StringBuilder(copy);
+//            string.append(aChar);
+//            if (string.length() == TARGET_LENGTH) {
+//                RES.add(string.toString());
+//            } else {
+//                stringGenerator(new StringBuilder(string.toString()));
+//            }
+//        }
+//    }
+
+    public void stressTest() {
         String url = "http://localhost:8080/get-message?id=1";
         List<CompletableFuture<Void>> futures = new ArrayList<>();
         ExecutorService executor = Executors.newFixedThreadPool(12);
@@ -25,7 +44,7 @@ public class LoadTest {
                 CompletableFuture<Void> future = CompletableFuture.runAsync(() -> {
                     try {
                         httpClient.send(HttpRequest.newBuilder().uri(URI.create(url)).build(), HttpResponse.BodyHandlers.ofString());
-                        System.out.println("Request number "+ finalI + " executed!" );
+                        System.out.println("Request number " + finalI + " executed!");
                     } catch (IOException | InterruptedException e) {
                         throw new RuntimeException(e);
                     }
