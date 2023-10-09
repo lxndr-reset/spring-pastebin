@@ -3,6 +3,7 @@ package com.pastebin.service;
 import com.pastebin.entity.ShortURL;
 import com.pastebin.util.ShortURLValueGenerator;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -46,6 +47,7 @@ public class ScheduledOperations {
      */
     @Scheduled(fixedDelay = 12, initialDelay = 12, timeUnit = TimeUnit.HOURS)
     @Transactional
+    @Async
     public void generateLinkValue() { //todo add checking should links be generated or not
         int valuesToGenerateAmount = (int) Math.round(ShortURL.getLastGeneratedAmount() * ShortURL.getMultiplier());
         List<ShortURL> linkValues = new ArrayList<>();
