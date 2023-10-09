@@ -6,12 +6,12 @@ import jakarta.persistence.*;
 import java.io.*;
 import java.util.Objects;
 
+import static jakarta.persistence.CascadeType.*;
+
 @Entity
 @Table(name = "short_url")
 public class ShortURL {
     private static final double MULTIPLIER = 1.5;
-    private static int maxValueLength = 0;
-    private static long lastGeneratedAmount = 20000;
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -22,7 +22,7 @@ public class ShortURL {
     private String urlValue;
 
     @JoinColumn(name = "foreign_message_id", referencedColumnName = "message_id")
-    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToOne(cascade = {PERSIST, DETACH, MERGE, REFRESH}, fetch = FetchType.LAZY)
     @JsonIgnore
     private Message message;
 
@@ -39,36 +39,50 @@ public class ShortURL {
     }
 
     public static long getLastGeneratedAmount() {
-        return lastGeneratedAmount;
+        try (BufferedReader bufferedReader = new BufferedReader(new FileReader("src/main/resources/last_generated_amount.txt"))) {
+            String line = bufferedReader.readLine();
+
+            if (line == null || line.isEmpty()) {
+                setLastGeneratedValue("10");
+                return 10;
+            }
+
+            return Long.parseLong(line);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
-    public static void setLastGeneratedAmount(long lastGeneratedAmount) {
-        ShortURL.lastGeneratedAmount = lastGeneratedAmount;
+    public static void setLastGeneratedAmount(long lastGeneratedValue) {
+        try (BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter("src/main/resources/last_generated_amount.txt"))) {
+            bufferedWriter.write(Long.toString(lastGeneratedValue));
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public static String getLastGeneratedValue() {
         try (BufferedReader bufferedReader = new BufferedReader(new FileReader("src/main/resources/last_sequence.txt"))) {
-            return bufferedReader.readLine();
+            String line = bufferedReader.readLine();
+
+            if (line == null || line.isEmpty()) {
+                setLastGeneratedValue("a");
+                return "a";
+            }
+
+            return line;
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
     }
 
     public static void setLastGeneratedValue(String lastGeneratedValue) {
-        try (BufferedWriter bufferedReader = new BufferedWriter(new FileWriter("src/main/resources/last_sequence.txt"))) {
-            bufferedReader.write(lastGeneratedValue);
+        try (BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter("src/main/resources/last_sequence.txt"))) {
+            bufferedWriter.write(lastGeneratedValue);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
 
-    }
-
-    public static int getMaxValueLength() {
-        return maxValueLength;
-    }
-
-    public static void setMaxValueLength(int maxValueLength) {
-        ShortURL.maxValueLength = maxValueLength;
     }
 
     public static double getMultiplier() {

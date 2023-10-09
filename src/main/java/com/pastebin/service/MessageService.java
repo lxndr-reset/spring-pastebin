@@ -1,8 +1,11 @@
 package com.pastebin.service;
 
-import com.pastebin.repository.MessageAccessRepo;
 import com.pastebin.entity.Message;
+import com.pastebin.repository.MessageAccessRepo;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -19,7 +22,7 @@ public class MessageService {
         this.messageAccessRepo = messageAccessRepo;
     }
 
-    @Transactional(readOnly = true)
+    @Cacheable(value = "message", key = "#message.shortURL.urlValue")
     public Message findById(Long id) {
         Optional<Message> message = messageAccessRepo.findById(id);
         if (message.isEmpty() || message.get().isDeleted()) {
@@ -28,29 +31,41 @@ public class MessageService {
         return message.get();
     }
 
-    @Transactional
+    @CachePut(value = "message", key = "#message.shortURL.urlValue")
     public Message save(Message message) {
         return messageAccessRepo.save(message);
     }
 
-    @Transactional
     public void deleteById(Long id) {
         messageAccessRepo.deleteById(id);
     }
 
     @Transactional
-    public void deleteAllMessagesByDeleted(){
-        messageAccessRepo.deleteAllByDeletedIsTrue();
-    }
-    public List<Message> findAll(){
-        return messageAccessRepo.findAll();
+    public void deleteAllMessagesByDeleted() {
+        messageAccessRepo.deleteAllByDeletedIsTrue().forEach(this::invalidateMessageCache);
     }
 
-    public long countByDeletedIsFalse(){
+    @CacheEvict(value = "message", key = "#message.shortURL.urlValue")
+    public void invalidateMessageCache(Message message) {
+    }
+
+    @Cacheable(value = "message", key = "#message.shortURL.urlValue")
+    public void validateMessageCache(Message message) {
+    }
+
+    @Transactional
+    public List<Message> findAll() {
+        List<Message> all = messageAccessRepo.findAll();
+        all.forEach(this::validateMessageCache);
+
+        return all;
+    }
+
+    public long countByDeletedIsFalse() {
         return messageAccessRepo.countByDeletedIsFalse();
     }
 
-    public long countAllMessages(){
+    public long countAllMessages() {
         return messageAccessRepo.count();
     }
 

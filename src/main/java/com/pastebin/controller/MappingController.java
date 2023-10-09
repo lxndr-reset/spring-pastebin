@@ -3,6 +3,7 @@ package com.pastebin.controller;
 import com.pastebin.entity.Message;
 import com.pastebin.entity.ShortURL;
 import com.pastebin.exception.NoAvailableShortURLException;
+import com.pastebin.exception.UrlNotExistsException;
 import com.pastebin.service.MessageService;
 import com.pastebin.service.ShortURLService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,7 +27,7 @@ public class MappingController {
 
 
     @RequestMapping("/get-message")
-    public String getMessage(Model model, @RequestParam Long id) {
+    public String getMessageByValue(Model model, @RequestParam Long id) {
         Message message = messageService.findById(id);
         model.addAttribute("message", message);
 
@@ -34,16 +35,24 @@ public class MappingController {
     }
 
     @RequestMapping("/get-message/{value}")
-    public String getMessage(Model model, @PathVariable String value) {
-        Message message = shortURLService.findByUrlValue(value).getMessage();
+    public String getMessageByValue(Model model, @PathVariable String value) throws UrlNotExistsException {
+        Message message = getMessageByValue(value);
         model.addAttribute("message", message);
 
         return "get_message";
     }
 
+    private Message getMessageByValue(String value) throws UrlNotExistsException {
+        ShortURL byUrlValue = shortURLService.findByUrlValue(value);
+        if (byUrlValue == null) {
+            throw new UrlNotExistsException("Message with link " + value + " not exists");
+        }
+        return byUrlValue.getMessage();
+    }
+
     @RequestMapping("/new-message")
     public String newMessage(Model model, @RequestParam String content) throws NoAvailableShortURLException {
-        ShortURL shortURL = shortURLService.getByMessageIsNullOrMessageDeleted();
+        ShortURL shortURL = shortURLService.getAvailableShortURL();
         Message message = new Message(content, shortURL);
         shortURL.setMessage(message);
 
@@ -80,4 +89,13 @@ public class MappingController {
         return "get_message";
     }
 
+    @RequestMapping("/delete-message/{value}")
+    public String deleteMessage(Model model, @PathVariable String value) throws UrlNotExistsException {
+        Message message = getMessageByValue(value);
+        message.setDeleted(true);
+        messageService.save(message);
+        model.addAttribute("message", message);
+
+        return "get_message";
+    }
 }

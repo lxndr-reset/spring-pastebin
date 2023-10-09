@@ -3,6 +3,7 @@ package com.pastebin.service;
 import com.pastebin.entity.ShortURL;
 import com.pastebin.util.ShortURLValueGenerator;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
@@ -26,15 +27,16 @@ public class ScheduledOperations {
         this.shortURLService = shortURLService;
     }
 
-    @Scheduled(fixedDelay = 14, timeUnit = TimeUnit.DAYS)
+    @Scheduled(fixedDelay = 14,initialDelay = 14, timeUnit = TimeUnit.DAYS)
     @Transactional
-    public void finalDelete() {
+    @CacheEvict("message")
+    public void finalDeleteMessages() {
         if (!isDeletingRunning) {
             isDeletingRunning = true;
             messageService.deleteAllMessagesByDeleted();
             isDeletingRunning = false;
 
-            System.out.println(getDateTime() + "Deleted rows were removed from database");
+            System.out.println(getDateTime() + "Messages were removed from database");
         }
     }
 
@@ -62,7 +64,6 @@ public class ScheduledOperations {
 
         shortURLService.saveAll(linkValues);
     }
-
     /**
      * Returns the current time in the format "dd.MM.yyyy HH:mm:ss" and adds a double-dash.
      *
