@@ -12,7 +12,7 @@ import java.util.NoSuchElementException;
 @Component
 public class CheckMessageIsExpired {
     @AfterReturning(pointcut = "@annotation(com.pastebin.annotation.AvailableMessages)", returning = "result")
-    public void aroundAdvice(JoinPoint joinPoint, Message result) {
+    public void aroundAdvice(Message result) {
 
         if (result.isDeleted() || (result.getDeletionDate() != null
                 && result.getDeletionDate().getTime() <= System.currentTimeMillis())) {
