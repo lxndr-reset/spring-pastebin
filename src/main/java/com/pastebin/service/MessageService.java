@@ -36,6 +36,7 @@ public class MessageService {
         return messageAccessRepo.save(message);
     }
 
+    @CacheEvict("message")
     public void deleteById(Long id) {
         messageAccessRepo.deleteById(id);
     }

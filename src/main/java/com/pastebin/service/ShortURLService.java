@@ -67,7 +67,7 @@ public class ShortURLService {
         return shortURLS;
     }
 
-    @CachePut(value = "url", key = "#url.urlValue")
+    @Cacheable(value = "url", key = "#url.urlValue")
     public void updateShortURLCache(ShortURL url) {
     }
 
