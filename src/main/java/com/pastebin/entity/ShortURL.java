@@ -84,7 +84,10 @@ public class ShortURL {
         }
 
     }
-
+    @PreRemove
+    public void preRemove() {
+        this.setMessage(null);
+    }
     public static double getMultiplier() {
         return MULTIPLIER;
     }

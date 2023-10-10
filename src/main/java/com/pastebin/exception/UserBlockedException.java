@@ -1,6 +1,9 @@
 package com.pastebin.exception;
 
 public class UserBlockedException extends RuntimeException {
+    public UserBlockedException() {
+    }
+
     public UserBlockedException(String message) {
         super(message);
     }
@@ -13,7 +16,7 @@ public class UserBlockedException extends RuntimeException {
         super(cause);
     }
 
-    public UserBlockedException(String message, Throwable cause, boolean enableSuppression, boolean writableStackService) {
-        super(message, cause, enableSuppression, writableStackService);
+    public UserBlockedException(String message, Throwable cause, boolean enableSuppression, boolean writableStackTrace) {
+        super(message, cause, enableSuppression, writableStackTrace);
     }
 }

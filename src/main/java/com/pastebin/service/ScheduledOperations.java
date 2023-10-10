@@ -27,13 +27,15 @@ public class ScheduledOperations {
         this.shortURLService = shortURLService;
     }
 
-    @Scheduled(fixedDelay = 14,initialDelay = 14, timeUnit = TimeUnit.DAYS)
+    @Scheduled(fixedDelay = 3
+//            , initialDelay = 3
+            , timeUnit = TimeUnit.DAYS)
     @Transactional
     @CacheEvict("message")
     public void finalDeleteMessages() {
         if (!isDeletingRunning) {
             isDeletingRunning = true;
-            messageService.deleteAllMessagesByDeleted();
+            messageService.deleteAllByDeletedIsTrueOrDeletionDateIsGreaterThanEqual();
             isDeletingRunning = false;
 
             System.out.println(getDateTime() + "Messages were removed from database");
@@ -47,7 +49,9 @@ public class ScheduledOperations {
      *
      * @see ShortURLValueGenerator#generate(String, int)
      */
-    @Scheduled(fixedDelay = 12, initialDelay = 12, timeUnit = TimeUnit.HOURS)
+    @Scheduled(fixedDelay = 12
+            , initialDelay = 12
+            , timeUnit = TimeUnit.HOURS)
     @Transactional
     @Async
     public void generateLinkValue() { //todo add checking should links be generated or not
@@ -64,6 +68,7 @@ public class ScheduledOperations {
 
         shortURLService.saveAll(linkValues);
     }
+
     /**
      * Returns the current time in the format "dd.MM.yyyy HH:mm:ss" and adds a double-dash.
      *

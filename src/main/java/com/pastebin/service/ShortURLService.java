@@ -2,6 +2,7 @@ package com.pastebin.service;
 
 import com.pastebin.entity.ShortURL;
 import com.pastebin.exception.NoAvailableShortURLException;
+import com.pastebin.exception.UrlNotExistsException;
 import com.pastebin.repository.ShortURLAccessRepo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
@@ -83,9 +84,14 @@ public class ShortURLService {
     }
 
     @Cacheable(value = "url", key = "#value")
-    public ShortURL findByUrlValue(String value) {
-        return shortURLAccessRepo.findByUrlValue(value)
-                .orElseThrow(NoSuchElementException::new);
+    public ShortURL findByUrlValue(String value) throws UrlNotExistsException {
+        Optional<ShortURL> byUrlValue = shortURLAccessRepo.findByUrlValue(value);
+
+        if (byUrlValue.isEmpty()) {
+            throw new UrlNotExistsException("Url with link 'https://localhost:8080/get-message/" + value +
+                    "' not exists");
+        }
+        return byUrlValue.get();
     }
 
 }
