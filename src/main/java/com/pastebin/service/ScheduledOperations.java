@@ -9,10 +9,18 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 @Component
@@ -54,19 +62,58 @@ public class ScheduledOperations {
             , timeUnit = TimeUnit.HOURS)
     @Transactional
     @Async
-    public void generateLinkValue() { //todo add checking should links be generated or not
-        int valuesToGenerateAmount = (int) Math.round(ShortURL.getLastGeneratedAmount() * ShortURL.getMultiplier());
-        List<ShortURL> linkValues = new ArrayList<>();
+    public void generateLinkValue() {
+        try {
+            if (!isEnoughLinksAvailable()) {
+                generateLinks();
+            }
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
 
-        ShortURLValueGenerator.generate(ShortURL.getLastGeneratedValue(), valuesToGenerateAmount)
-                .forEach(seq -> linkValues.add(new ShortURL(new String(seq))));
+
+    @Async
+    public void generateLinkValueWithoutCheck() {
+        generateLinks();
+    }
+
+    @Async
+    protected void generateLinks() {
+        int valuesToGenerateAmount = (int) Math.round(ShortURL.getLastGeneratedAmount() * ShortURL.getMultiplier());
+        List<ShortURL> linkValues = Collections.synchronizedList(new ArrayList<>());
+
+        try (ExecutorService executor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors())) {
+            List<CompletableFuture<Void>> futures = ShortURLValueGenerator.generate(ShortURL.getLastGeneratedValue(),
+                            valuesToGenerateAmount)
+                    .stream()
+                    .map(seq -> CompletableFuture.supplyAsync(() ->
+                            new ShortURL(new String(seq)), executor).thenAcceptAsync(linkValues::add))
+                    .toList();
+
+            CompletableFuture.allOf(futures.toArray(new CompletableFuture[0])).join();
+            executor.shutdown();
+        }
 
         System.out.println(getDateTime() + "Unique URLs were generated");
 
-        ShortURL.setLastGeneratedValue(linkValues.getLast().getUrlValue());
+        ShortURL.setLastGeneratedValue(getMaxString(linkValues));
         ShortURL.setLastGeneratedAmount(valuesToGenerateAmount);
 
         shortURLService.saveAll(linkValues);
+    }
+
+    private String getMaxString(List<ShortURL> list) {
+        return list.stream().max(Comparator.comparing(ShortURL::getUrlValue)).orElseThrow(() ->
+                        new RuntimeException("Error in generating unique links. Please contact administrator"))
+                .getUrlValue();
+    }
+
+    protected boolean isEnoughLinksAvailable() throws IOException {
+        try (BufferedReader reader = new BufferedReader(new FileReader("src/main/resources/last_generated_amount.txt"))) {
+            long lastGeneratedAmount = Long.parseLong(reader.readLine());
+            return lastGeneratedAmount >> 2 >= shortURLService.countAllByMessageNull();
+        }
     }
 
     /**

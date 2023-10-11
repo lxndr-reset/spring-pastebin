@@ -76,7 +76,7 @@ public class ShortURLService {
         Optional<ShortURL> result = shortURLAccessRepo.getFirstShortURLByMessageIsNullOrMessageDeletedIsTrue();
 
         if (result.isEmpty()) {
-            applicationContext.getBean(ScheduledOperations.class).generateLinkValue();
+            applicationContext.getBean(ScheduledOperations.class).generateLinkValueWithoutCheck();
             throw new NoAvailableShortURLException("No urls are available! Generation starts now. Please try again in few minutes");
         }
 
