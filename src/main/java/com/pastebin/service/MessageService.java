@@ -36,7 +36,7 @@ public class MessageService {
                 return message;
             }
         }
-        throw new NoSuchElementException("Message on link https://localhost:8080/get-message/" + value + " does not exists");
+        throw new NoSuchElementException("Message on link https://localhost:8080/message/get/" + value + " does not exists");
     }
 
     @AvailableMessages
@@ -57,7 +57,7 @@ public class MessageService {
         Message message = deletedMessageIfExists(byShortURLUrlValue);
         if (message != null) return message;
 
-        throw new NoSuchElementException("Message on link https://localhost:8080/get-message/" + value + " does not exists");
+        throw new NoSuchElementException("Message on link https://localhost:8080/message/get/" + value + " does not exists");
     }
 
     private Message deletedMessageIfExists(Optional<Message> byShortURLUrlValue) {
@@ -79,7 +79,7 @@ public class MessageService {
         Message message = deletedMessageIfExists(byShortURLUrlValue);
         if (message != null) return message;
 
-        throw new NoSuchElementException("Message on link https://localhost:8080/get-message/" + id + " does not exists");
+        throw new NoSuchElementException("Message on link https://localhost:8080/message/get/" + id + " does not exists");
     }
 
 

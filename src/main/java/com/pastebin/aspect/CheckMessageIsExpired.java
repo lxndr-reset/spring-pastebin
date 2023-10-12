@@ -15,7 +15,7 @@ public class CheckMessageIsExpired {
 
         if (result.isDeleted() || (result.getDeletionDate() != null
                 && result.getDeletionDate().getTime() <= System.currentTimeMillis())) {
-            throw new NoSuchElementException("Element with link http://localhost:8080/get-message/" + result.
+            throw new NoSuchElementException("Element with link http://localhost:8080/message/get/" + result.
                     getShortURL().getUrlValue() + " was not found");
         }
     }

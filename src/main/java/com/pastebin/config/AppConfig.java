@@ -23,15 +23,6 @@ import java.util.concurrent.TimeUnit;
 @EnableAsync
 public class AppConfig {
     @Bean
-    public ViewResolver viewResolver() {
-        InternalResourceViewResolver viewResolver = new InternalResourceViewResolver();
-        viewResolver.setPrefix("/WEB-INF/view/");
-        viewResolver.setSuffix(".jsp");
-
-        return viewResolver;
-    }
-
-    @Bean
     public Executor executor() {
         return Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
     }

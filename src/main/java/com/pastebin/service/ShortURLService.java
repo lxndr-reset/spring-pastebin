@@ -88,7 +88,7 @@ public class ShortURLService {
         Optional<ShortURL> byUrlValue = shortURLAccessRepo.findByUrlValue(value);
 
         if (byUrlValue.isEmpty()) {
-            throw new UrlNotExistsException("Url with link 'https://localhost:8080/get-message/" + value +
+            throw new UrlNotExistsException("Url with link 'https://localhost:8080/message/get/" + value +
                     "' not exists");
         }
         return byUrlValue.get();
