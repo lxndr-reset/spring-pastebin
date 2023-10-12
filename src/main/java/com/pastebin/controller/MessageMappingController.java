@@ -3,29 +3,22 @@ package com.pastebin.controller;
 import com.pastebin.entity.Message;
 import com.pastebin.entity.ShortURL;
 import com.pastebin.entity.date.ValidTime;
-import com.pastebin.exception.MessageDeletedException;
 import com.pastebin.exception.NoAvailableShortURLException;
-import com.pastebin.exception.UrlNotExistsException;
-import com.pastebin.exception.UserBlockedException;
 import com.pastebin.service.MessageService;
 import com.pastebin.service.ShortURLService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
-import java.util.NoSuchElementException;
-
 @Controller
-public class MappingController {
+public class MessageMappingController {
     private final MessageService messageService;
     private final ShortURLService shortURLService;
-
     @Autowired
-    public MappingController(MessageService messageService, ShortURLService shortURLService) {
+    public MessageMappingController(MessageService messageService, ShortURLService shortURLService) {
         this.messageService = messageService;
         this.shortURLService = shortURLService;
     }
@@ -77,16 +70,6 @@ public class MappingController {
         model.addAttribute("message", message);
 
         return "get_message";
-    }
-
-    @ExceptionHandler(value = {NoSuchElementException.class, MessageDeletedException.class,
-            NoAvailableShortURLException.class, UrlNotExistsException.class, UserBlockedException.class,
-            IllegalArgumentException.class
-    })
-    public String error(Exception exception, Model model) {
-        model.addAttribute("exception", exception);
-
-        return "error";
     }
 
     @RequestMapping("/edit-message")

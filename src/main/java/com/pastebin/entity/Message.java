@@ -32,6 +32,10 @@ public class Message {
             , fetch = FetchType.LAZY)
     private ShortURL shortURL;
 
+    @JoinColumn(name = "owner_id", referencedColumnName = "user_id")
+    @ManyToOne(fetch = FetchType.LAZY, cascade = ALL)
+    private User user;
+
     public Message() {
     }
 
@@ -46,6 +50,14 @@ public class Message {
         setDeletionDate(deletionDate);
     }
 
+    public User getUser() {
+        return user;
+    }
+
+    public void setUser(User user) {
+        this.user = user;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -54,12 +66,13 @@ public class Message {
                 && Objects.equals(getValue(), message.getValue())
                 && Objects.equals(deleted, message.deleted)
                 && Objects.equals(getShortURL(), message.getShortURL())
-                && Objects.equals(deletionDate, message.deletionDate);
+                && Objects.equals(deletionDate, message.deletionDate)
+                && Objects.equals(getUser(), message.getUser());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(deletionDate, getId(), getValue(), deleted, getShortURL());
+        return Objects.hash(deletionDate, getId(), getValue(), deleted, getShortURL(), getUser());
     }
 
     public ShortURL getShortURL() {
@@ -98,9 +111,11 @@ public class Message {
     public String toString() {
         return "Message{" +
                 "id=" + id +
-                ", deleteDate='" + deletionDate + '\'' +
                 ", value='" + value + '\'' +
                 ", deleted=" + deleted +
+                ", deletionDate=" + deletionDate +
+                ", shortURL=" + shortURL +
+                ", user=" + user +
                 '}';
     }
 
