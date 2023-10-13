@@ -20,12 +20,12 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(value = {NoSuchElementException.class, MessageDeletedException.class,
             NoAvailableShortURLException.class, UrlNotExistsException.class, UserBlockedException.class,
-            IllegalArgumentException.class
+            IllegalArgumentException.class, SecurityException.class
     })
     public String handleError(Model model, Exception exception) {
         model.addAttribute("message", exception.getMessage());
-        model.addAttribute("exceptionName", exception.getClass().getName());
         model.addAttribute("currentTime", LocalDateTime.now());
+        model.addAttribute("exceptionName", exception.getClass().getName());
         model.addAttribute("stack_trace", exception.getStackTrace());
 
         return "error";

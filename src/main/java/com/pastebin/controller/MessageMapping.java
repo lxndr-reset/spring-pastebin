@@ -2,24 +2,27 @@ package com.pastebin.controller;
 
 import com.pastebin.entity.Message;
 import com.pastebin.entity.ShortURL;
+import com.pastebin.entity.User;
 import com.pastebin.entity.date.ValidTime;
 import com.pastebin.exception.NoAvailableShortURLException;
+import com.pastebin.exception.NotAuthenticatedException;
 import com.pastebin.service.MessageService;
 import com.pastebin.service.ShortURLService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 @Controller
 @RequestMapping("/message")
-public class MessageMappingController {
+public class MessageMapping {
     private final MessageService messageService;
     private final ShortURLService shortURLService;
 
     @Autowired
-    public MessageMappingController(MessageService messageService, ShortURLService shortURLService) {
+    public MessageMapping(MessageService messageService, ShortURLService shortURLService) {
         this.messageService = messageService;
         this.shortURLService = shortURLService;
     }
@@ -41,8 +44,18 @@ public class MessageMappingController {
         return "get_message";
     }
 
+    @RequestMapping("/get/all")
+    public String getAllUsersMessages(@ModelAttribute("user") User user, @ModelAttribute("email") String email) throws NotAuthenticatedException {
+        if (user != null && user.getEmail() != null && user.getEmail().equals(email)) {
+            return "user";
+        }
+        throw new SecurityException("This url available for authenticated users only. Try http://localhost:8080/user/login/*login/*password");
+        //todo when i implement normal security, change this to annotation
+    }
+
     @RequestMapping("/new/{content}/{stringDeletionDate}")
-    public String newMessage(Model model, @PathVariable String content, @PathVariable String stringDeletionDate) throws NoAvailableShortURLException {
+    public String newMessage(Model model, @PathVariable String content,
+                             @PathVariable String stringDeletionDate) throws NoAvailableShortURLException {
         ShortURL shortURL = shortURLService.getAvailableShortURL();
         Message message;
 
