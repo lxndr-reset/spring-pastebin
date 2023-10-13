@@ -10,7 +10,7 @@ import java.util.Optional;
 public interface ShortURLRepo extends JpaRepository<ShortURL, Long> {
     long countAllByMessageNull();
 
-    Optional<ShortURL> getFirstShortURLByMessageIsNullOrMessageDeletedIsTrue();
+    Optional<ShortURL> getFirstShortURLByMessageIsNull();
 
     Optional<ShortURL> findByUrlValue(String value);
 

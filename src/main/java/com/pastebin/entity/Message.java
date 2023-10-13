@@ -10,7 +10,7 @@ import java.util.Objects;
 import static jakarta.persistence.CascadeType.*;
 
 @Entity
-@Table(name = "message")
+@Table(name = "\"message\"")
 @Component
 public class Message {
 

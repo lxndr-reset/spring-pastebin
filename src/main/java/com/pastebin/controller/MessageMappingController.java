@@ -11,7 +11,6 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 
 @Controller
 @RequestMapping("/message")
@@ -25,6 +24,14 @@ public class MessageMappingController {
         this.shortURLService = shortURLService;
     }
 
+    private static ValidTime getValidTimeDate(String stringDeletionDate) {
+        try {
+            return ValidTime.valueOf(stringDeletionDate);
+        } catch (IllegalArgumentException e) {
+            throw new IllegalArgumentException("Missing option " + stringDeletionDate + ".\n Available options: " +
+                    "ONE_HOUR, ONE_DAY, ONE_WEEK, TWO_WEEKS, ONE_MONTH, THREE_MONTHS");
+        }
+    }
 
     @RequestMapping("/get/{value}")
     public String getMessageByValue(Model model, @PathVariable String value) {
@@ -39,14 +46,7 @@ public class MessageMappingController {
         ShortURL shortURL = shortURLService.getAvailableShortURL();
         Message message;
 
-        try {
-            ValidTime deletionDate = ValidTime.valueOf(stringDeletionDate);
-            message = new Message(content, shortURL, deletionDate);
-        } catch (IllegalArgumentException e) {
-            throw new IllegalArgumentException("Missing option " + stringDeletionDate + ".\n Available options: " +
-                    "ONE_HOUR, ONE_DAY, ONE_WEEK, TWO_WEEKS, ONE_MONTH, THREE_MONTHS");
-        }
-
+        message = new Message(content, shortURL, getValidTimeDate(stringDeletionDate));
         shortURL.setMessage(message);
         messageService.save(message);
         model.addAttribute("message", message);
@@ -55,9 +55,32 @@ public class MessageMappingController {
     }
 
     @RequestMapping("/edit/{value}/{content}")
-    public String editMessage(Model model, @PathVariable String value, @PathVariable String content) {
+    public String editMessageContent(Model model, @PathVariable String value, @PathVariable String content) {
         Message message = messageService.findByValue(value);
         message.setValue(content);
+        messageService.save(message);
+
+        model.addAttribute("message", message);
+        return "get_message";
+    }
+
+    @RequestMapping("/edit/{value}/{content}/{deletionDate}")
+    public String editMessageContentAndDeletionDate(Model model, @PathVariable String value,
+                                                    @PathVariable String content, @PathVariable String deletionDate) {
+        Message message = messageService.findByValue(value);
+        message.setValue(content);
+        message.setDeletionDate(getValidTimeDate(deletionDate));
+        messageService.save(message);
+
+        model.addAttribute("message", message);
+        return "get_message";
+    }
+
+    @RequestMapping("/edit-time/{value}/{deletionDate}")
+    public String editMessageDeletionDate(Model model, @PathVariable String value,
+                                          @PathVariable String deletionDate) {
+        Message message = messageService.findByValue(value);
+        message.setDeletionDate(getValidTimeDate(deletionDate));
         messageService.save(message);
 
         model.addAttribute("message", message);
