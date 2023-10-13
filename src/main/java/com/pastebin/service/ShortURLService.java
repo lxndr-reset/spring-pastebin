@@ -3,13 +3,12 @@ package com.pastebin.service;
 import com.pastebin.entity.ShortURL;
 import com.pastebin.exception.NoAvailableShortURLException;
 import com.pastebin.exception.UrlNotExistsException;
-import com.pastebin.repository.ShortURLAccessRepo;
+import com.pastebin.repository.ShortURLRepo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.context.ApplicationContext;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -20,49 +19,48 @@ import java.util.Optional;
 @Service
 @Transactional
 public class ShortURLService {
-    private final ShortURLAccessRepo shortURLAccessRepo;
+    private final ShortURLRepo shortURLRepo;
     private final ApplicationContext applicationContext;
 
     @Autowired
-    public ShortURLService(ShortURLAccessRepo shortURLAccessRepo, ApplicationContext applicationContext) {
-        this.shortURLAccessRepo = shortURLAccessRepo;
+    public ShortURLService(ShortURLRepo shortURLRepo, ApplicationContext applicationContext) {
+        this.shortURLRepo = shortURLRepo;
         this.applicationContext = applicationContext;
     }
 
     @CachePut(value = "url", key = "#url.urlValue")
     public ShortURL save(ShortURL url) {
-        return shortURLAccessRepo.save(url);
+        return shortURLRepo.save(url);
     }
 
     @Deprecated
     @Cacheable(value = "url", key = "#id")
     public ShortURL findById(long id) {
-        return shortURLAccessRepo.findById(id).orElseThrow(() ->
+        return shortURLRepo.findById(id).orElseThrow(() ->
                 new NoSuchElementException("URL with id " + id + " not found"));
     }
 
     @CacheEvict(value = "url", key = "#id")
     public void deleteById(long id) {
-        shortURLAccessRepo.deleteById(id);
+        shortURLRepo.deleteById(id);
     }
 
 
     @CacheEvict(value = "url", key = "#value")
     public void deleteByValue(String value) {
-        shortURLAccessRepo.deleteShortURLByUrlValue(value);
+        shortURLRepo.deleteShortURLByUrlValue(value);
     }
 
     public long countAllByMessageNull() {
-        return shortURLAccessRepo.countAllByMessageNull();
+        return shortURLRepo.countAllByMessageNull();
     }
 
     public long count() {
-        return shortURLAccessRepo.count();
+        return shortURLRepo.count();
     }
 
-    @Transactional
     public List<ShortURL> saveAll(Iterable<ShortURL> urls) {
-        List<ShortURL> shortURLS = shortURLAccessRepo.saveAll(urls);
+        List<ShortURL> shortURLS = shortURLRepo.saveAll(urls);
         shortURLS.forEach(this::updateShortURLCache);
 
         return shortURLS;
@@ -73,7 +71,7 @@ public class ShortURLService {
     }
 
     public ShortURL getAvailableShortURL() throws NoAvailableShortURLException {
-        Optional<ShortURL> result = shortURLAccessRepo.getFirstShortURLByMessageIsNullOrMessageDeletedIsTrue();
+        Optional<ShortURL> result = shortURLRepo.getFirstShortURLByMessageIsNullOrMessageDeletedIsTrue();
 
         if (result.isEmpty()) {
             applicationContext.getBean(ScheduledOperations.class).generateLinkValueWithoutCheck();
@@ -85,7 +83,7 @@ public class ShortURLService {
 
     @Cacheable(value = "url", key = "#value")
     public ShortURL findByUrlValue(String value) throws UrlNotExistsException {
-        Optional<ShortURL> byUrlValue = shortURLAccessRepo.findByUrlValue(value);
+        Optional<ShortURL> byUrlValue = shortURLRepo.findByUrlValue(value);
 
         if (byUrlValue.isEmpty()) {
             throw new UrlNotExistsException("Url with link 'https://localhost:8080/message/get/" + value +

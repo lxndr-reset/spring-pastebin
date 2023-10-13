@@ -12,13 +12,13 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
-public interface MessageAccessRepo extends JpaRepository<Message, Long> {
+public interface MessageRepo extends JpaRepository<Message, Long> {
     @Modifying
     List<Message> deleteAllByDeletedIsTrue();
 
     long countByDeletedIsFalse();
 
-    Optional<Message> findByShortURLUrlValue(String value);
+    Optional<Message> findMessageByShortURLUrlValue(String value);
 
     @Modifying
     @Transactional

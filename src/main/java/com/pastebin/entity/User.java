@@ -1,32 +1,35 @@
 package com.pastebin.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.pastebin.annotation.EmailCheck;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Size;
 
 import java.util.Objects;
 import java.util.Set;
 
 @Entity
-@Table(name = "user")
+@Table(name = "\"user\"")
 public class User {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "user_id")
-    private Integer userId;
+    private Long userId;
 
     @Column(name = "email")
+    @EmailCheck
     private String email;
 
     @Column(name = "pass_bcrypt")
+    @Size(min = 72, max = 72, message = "Password must be hashed in 72 chars")
     private String pass_bcrypt;
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JsonIgnore
     private Set<Message> allUsersMessages;
 
-    public User(Integer userId, String email, String pass_bcrypt) {
-        this.userId = userId;
+    public User(String email, String pass_bcrypt) {
         this.email = email;
         this.pass_bcrypt = pass_bcrypt;
     }
@@ -54,11 +57,11 @@ public class User {
                 '}';
     }
 
-    public Integer getUserId() {
+    public Long getUserId() {
         return userId;
     }
 
-    public void setUserId(Integer userId) {
+    public void setUserId(Long userId) {
         this.userId = userId;
     }
 

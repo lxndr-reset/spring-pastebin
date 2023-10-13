@@ -2,33 +2,33 @@ package com.pastebin.service;
 
 import com.pastebin.annotation.AvailableMessages;
 import com.pastebin.entity.Message;
-import com.pastebin.repository.MessageAccessRepo;
+import com.pastebin.repository.MessageRepo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
-import org.springframework.context.NoSuchMessageException;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.Timestamp;
-import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 
 @Service
+@Transactional
 public class MessageService {
-    private final MessageAccessRepo messageAccessRepo;
+    private final MessageRepo messageRepo;
 
     @Autowired
-    public MessageService(MessageAccessRepo messageAccessRepo) {
-        this.messageAccessRepo = messageAccessRepo;
+    public MessageService(MessageRepo messageRepo) {
+        this.messageRepo = messageRepo;
     }
 
     @AvailableMessages
-    @Cacheable(value = "message", key = "#value")
+    @Cacheable(value = "message", key = "#value", unless = "#result == null")
     public Message findByValue(String value) {
-        Optional<Message> byShortURLUrlValue = messageAccessRepo.findByShortURLUrlValue(value);
+        Optional<Message> byShortURLUrlValue = messageRepo.findMessageByShortURLUrlValue(value);
 
         if (byShortURLUrlValue.isPresent()) {
             Message message = byShortURLUrlValue.get();
@@ -42,7 +42,7 @@ public class MessageService {
     @AvailableMessages
     @Cacheable(value = "message", key = "#id")
     public Message findById(Long id) {
-        Optional<Message> message = messageAccessRepo.findById(id);
+        Optional<Message> message = messageRepo.findById(id);
         if (message.isEmpty() || message.get().isDeleted() || System.currentTimeMillis() >
                 message.get().getDeletionDate().getTime()) {
             throw new NoSuchElementException("Message with id " + id + " not found");
@@ -52,7 +52,7 @@ public class MessageService {
 
     @CacheEvict(value = "message", key = "#value")
     public Message softDeleteByValue(String value) {
-        Optional<Message> byShortURLUrlValue = messageAccessRepo.findByShortURLUrlValue(value);
+        Optional<Message> byShortURLUrlValue = messageRepo.findMessageByShortURLUrlValue(value);
 
         Message message = deletedMessageIfExists(byShortURLUrlValue);
         if (message != null) return message;
@@ -65,7 +65,7 @@ public class MessageService {
             Message message = byShortURLUrlValue.get();
             if (message != null && !message.isDeleted()) {
                 message.setDeleted(true);
-                messageAccessRepo.save(message);
+                messageRepo.save(message);
                 return message;
             }
         }
@@ -74,7 +74,7 @@ public class MessageService {
 
     @CacheEvict(value = "message", key = "#id")
     public Message softDeleteById(Long id) {
-        Optional<Message> byShortURLUrlValue = messageAccessRepo.findById(id);
+        Optional<Message> byShortURLUrlValue = messageRepo.findById(id);
 
         Message message = deletedMessageIfExists(byShortURLUrlValue);
         if (message != null) return message;
@@ -84,23 +84,29 @@ public class MessageService {
 
 
     @AvailableMessages
-    @CachePut(value = "message", key = "#message.shortURL.urlValue")
+    @Caching(evict = @CacheEvict(value = "message", key = "#message.shortURL.urlValue"),
+            put = @CachePut(value = "message", key = "#message.shortURL.urlValue"))
     public Message save(Message message) {
-        return messageAccessRepo.save(message);
+        try {
+            return messageRepo.save(message);
+        } catch (Exception e) {
+            invalidateMessageCacheValue(message);
+            throw e;
+        }
     }
 
     @CacheEvict(value = "message", key = "#id")
     public void deleteById(Long id) {
-        messageAccessRepo.deleteById(id);
+        messageRepo.deleteById(id);
     }
 
     @Transactional
     public void deleteAllMessagesByDeleted() {
-        messageAccessRepo.deleteAllByDeletedIsTrue().forEach(this::invalidateMessageCache);
+        messageRepo.deleteAllByDeletedIsTrue().forEach(this::invalidateMessageCacheValue);
     }
 
     @CacheEvict(value = "message", key = "#message.shortURL.urlValue")
-    public void invalidateMessageCache(Message message) {
+    public void invalidateMessageCacheValue(Message message) {
     }
 
     @Cacheable(value = "message", key = "#message.shortURL.urlValue")
@@ -108,6 +114,6 @@ public class MessageService {
     }
 
     public void deleteAllByDeletedIsTrueOrDeletionDateIsGreaterThanEqual() {
-        messageAccessRepo.deleteAllByDeletedIsTrueOrDeletionDateIsGreaterThanEqual(new Timestamp(System.currentTimeMillis()));
+        messageRepo.deleteAllByDeletedIsTrueOrDeletionDateIsGreaterThanEqual(new Timestamp(System.currentTimeMillis()));
     }
 }

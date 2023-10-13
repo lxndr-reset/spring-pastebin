@@ -7,7 +7,7 @@ import org.springframework.stereotype.Repository;
 import java.util.Optional;
 
 @Repository
-public interface ShortURLAccessRepo extends JpaRepository<ShortURL, Long> {
+public interface ShortURLRepo extends JpaRepository<ShortURL, Long> {
     long countAllByMessageNull();
 
     Optional<ShortURL> getFirstShortURLByMessageIsNullOrMessageDeletedIsTrue();

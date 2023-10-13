@@ -134,7 +134,6 @@ public class ShortURL {
         return "ShortURL{" +
                 "urlId=" + urlId +
                 ", urlValue='" + urlValue + '\'' +
-                ", message=" + message +
                 '}';
     }
 }

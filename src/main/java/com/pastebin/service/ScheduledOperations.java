@@ -36,7 +36,7 @@ public class ScheduledOperations {
     }
 
     @Scheduled(fixedDelay = 3
-//            , initialDelay = 3
+            , initialDelay = 3
             , timeUnit = TimeUnit.DAYS)
     @Transactional
     @CacheEvict("message")

@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 @Controller
-@RequestMapping("message")
+@RequestMapping("/message")
 public class MessageMappingController {
     private final MessageService messageService;
     private final ShortURLService shortURLService;
@@ -25,31 +25,10 @@ public class MessageMappingController {
         this.shortURLService = shortURLService;
     }
 
-    @Deprecated
-    @RequestMapping("/get")
-    public String getMessageByValue(Model model, @RequestParam Long id) {
-        Message message = messageService.findById(id);
-        model.addAttribute("message", message);
-
-        return "get_message";
-    }
 
     @RequestMapping("/get/{value}")
     public String getMessageByValue(Model model, @PathVariable String value) {
         Message message = messageService.findByValue(value);
-        model.addAttribute("message", message);
-
-        return "get_message";
-    }
-
-    @Deprecated
-    @RequestMapping("/new")
-    public String newMessage(Model model, @RequestParam String content) throws NoAvailableShortURLException {
-        ShortURL shortURL = shortURLService.getAvailableShortURL();
-        Message message = new Message(content, shortURL);
-        shortURL.setMessage(message);
-
-        messageService.save(message);
         model.addAttribute("message", message);
 
         return "get_message";
@@ -76,7 +55,7 @@ public class MessageMappingController {
     }
 
     @RequestMapping("/edit/{value}/{content}")
-    public String editMessage(Model model, @RequestParam String value, @RequestParam String content) {
+    public String editMessage(Model model, @PathVariable String value, @PathVariable String content) {
         Message message = messageService.findByValue(value);
         message.setValue(content);
         messageService.save(message);
@@ -85,26 +64,6 @@ public class MessageMappingController {
         return "get_message";
     }
 
-    @RequestMapping("/edit/{id}")
-    public String editMessage(Model model, @RequestParam String content, @RequestParam Long id) {
-        Message message = messageService.findById(id);
-        message.setValue(content);
-        messageService.save(message);
-
-        model.addAttribute(message);
-        return "get_message";
-    }
-
-    @Deprecated
-    @RequestMapping("/delete")
-    public String deleteMessage(Model model, @RequestParam Long id) {
-        Message message = messageService.findById(id);
-        message.setDeleted(true);
-        messageService.save(message);
-        model.addAttribute("message", message);
-
-        return "get_message";
-    }
 
     @RequestMapping("/delete/{value}")
     public String deleteMessage(Model model, @PathVariable String value) {
@@ -113,4 +72,5 @@ public class MessageMappingController {
 
         return "get_message";
     }
+
 }

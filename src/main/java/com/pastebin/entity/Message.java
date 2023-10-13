@@ -7,7 +7,7 @@ import org.springframework.stereotype.Component;
 import java.sql.Timestamp;
 import java.util.Objects;
 
-import static jakarta.persistence.CascadeType.ALL;
+import static jakarta.persistence.CascadeType.*;
 
 @Entity
 @Table(name = "message")
@@ -28,11 +28,11 @@ public class Message {
     @Column(name = "delete_date")
     private Timestamp deletionDate;
 
-    @OneToOne(mappedBy = "message", cascade = ALL
-            , fetch = FetchType.LAZY)
+    @OneToOne(mappedBy = "message", cascade = {DETACH, MERGE, PERSIST, REFRESH}
+            , fetch = FetchType.EAGER)
     private ShortURL shortURL;
 
-    @JoinColumn(name = "owner_id", referencedColumnName = "user_id")
+    @JoinColumn(name = "owner_id")
     @ManyToOne(fetch = FetchType.LAZY, cascade = ALL)
     private User user;
 
