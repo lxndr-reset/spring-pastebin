@@ -15,17 +15,10 @@ public class RootMapping {
         return "registration";
     }
 
-    //    @RequestMapping(value = "/login")
-//    public String login(RedirectAttributes redirectAttributes, @PathVariable String email, @PathVariable String password) {
-//        User userByEmail = userService.findUserByEmail(email);
-//        redirectAttributes.addAttribute("user", userByEmail);
-//        redirectAttributes.addAttribute("email", userByEmail.getEmail());
-//
-//        if (passwordEncoder.matches(password, userByEmail.getPass_bcrypt())) {
-//            logger.info("auth for user {} successful", userByEmail.getEmail());
-//            return "redirect:/message/get/all";
-//        }
-//
-//        throw new NoSuchElementException("Wrong details. Try again");
-//    }
+    @RequestMapping(value = "/login")
+    public String login(Model model) {
+        model.addAttribute("user", new User());
+
+        return "/login";
+    }
 }

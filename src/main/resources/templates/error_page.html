@@ -9,10 +9,8 @@
 <p><strong>Time: </strong><span th:text="${currentTime}"></span></p>
 <p><strong>Error type: </strong><span th:text="${exceptionName}"></span></p>
 <p><strong>Stack trace:</strong></p>
-<p></p>
-<p><span th:each="line : ${stack_trace}">
+<p th:each="line : ${stack_trace}">
     <span th:text="${line}"></span>
-</span></p>
-
+</p>
 </body>
 </html>

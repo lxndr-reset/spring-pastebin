@@ -49,8 +49,7 @@ public class MessageMapping {
         if (user != null && user.getEmail() != null && user.getEmail().equals(email)) {
             return "user";
         }
-        throw new SecurityException("This url available for authenticated users only. Try http://localhost:8080/user/login/*login/*password");
-        //todo when i implement normal security, change this to annotation
+        return "redirect:/";
     }
 
     @RequestMapping("/new/{content}/{stringDeletionDate}")

@@ -2,13 +2,11 @@ package com.pastebin.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.Size;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
-import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.Set;
 
@@ -24,14 +22,13 @@ public class User {
     @Column(name = "email")
     private String email;
     @Column(name = "pass_bcrypt")
-    @Size(min = 72, max = 72, message = "Password must be hashed in 72 chars")
     private String pass_bcrypt;
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JsonIgnore
     private Set<Message> allUsersMessages;
 
 
-    public User(String email, char[] rawPassword) {
+    public User(String email, String rawPassword) {
         this.setEmail(email);
         this.setPass_bcrypt(rawPassword);
     }
@@ -76,10 +73,10 @@ public class User {
     }
 
     public void setEmail(String s) {
-        if (s == null || s.isEmpty() || !s.matches("^[a-zA-Z0-9._+-]+@[a-zA-Z0-9-._]+\\.[a-zA-Z]+$")) {
-            logger.info("Wrong email: {}", s);
-            throw new NoSuchElementException("Wrong details");
-        }
+//        if (s == null || s.isEmpty() || !s.matches("^[a-zA-Z0-9._+-]+@[a-zA-Z0-9-._]+\\.[a-zA-Z]+$")) {
+//            logger.info("Wrong email: {}", s);
+//            throw new NoSuchElementException("Wrong details");
+//        }
         this.email = s;
     }
 
@@ -87,8 +84,8 @@ public class User {
         return pass_bcrypt;
     }
 
-    public void setPass_bcrypt(char[] rawPass) {
-        this.pass_bcrypt = hashPassword(rawPass);
+    public void setPass_bcrypt(String rawPass) {
+        this.pass_bcrypt = encoder.encode(rawPass);
     }
 
     public Set<Message> getAllUsersMessages() {
