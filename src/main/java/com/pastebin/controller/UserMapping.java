@@ -3,13 +3,14 @@ package com.pastebin.controller;
 import com.pastebin.entity.User;
 import com.pastebin.service.UserDetailsService;
 import com.pastebin.service.UserService;
+import com.pastebin.util.SecurityUtils;
 import jakarta.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.context.SecurityContextHolderStrategy;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
@@ -27,11 +28,14 @@ public class UserMapping {
     private final AuthenticationProvider authenticationProvider;
     private final HttpServletResponse httpServletResponse;
     private final PasswordEncoder passwordEncoder;
+    private final SecurityContextHolderStrategy securityContextStrategy = SecurityUtils.securityContextHolderStrategy();
+
 
     @Autowired
     public UserMapping(UserService userService
             , UserDetailsService userDetailsService, AuthenticationProvider authenticationProvider,
-                       HttpServletResponse httpServletResponse, PasswordEncoder passwordEncoder) {
+                       HttpServletResponse httpServletResponse, PasswordEncoder passwordEncoder
+    ) {
         this.userService = userService;
         this.userDetailsService = userDetailsService;
         this.authenticationProvider = authenticationProvider;
@@ -62,16 +66,14 @@ public class UserMapping {
         if (matches) {
             setAuthenticationInContextHolder(user);
         }
-        return;
     }
 
     public void setAuthenticationInContextHolder(User user) {
         UserDetails userDetails = userDetailsService.loadUserByEntity(user);
         UsernamePasswordAuthenticationToken authReq =
                 new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
-//        authenticationProvider.authenticate(authReq);
-        SecurityContextHolder.getContext().setAuthentication(authReq);
-        return;
+        authenticationProvider.authenticate(authReq);
+        securityContextStrategy.getContext().setAuthentication(authReq);
     }
 
 }

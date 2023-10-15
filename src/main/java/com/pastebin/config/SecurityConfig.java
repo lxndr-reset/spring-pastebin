@@ -6,10 +6,11 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
-import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.context.SecurityContextHolderStrategy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
@@ -57,20 +58,21 @@ public class SecurityConfig {
 
 
     @Bean
-    public AuthenticationFailureHandler authenticationFailureHandler(){
+    public AuthenticationFailureHandler authenticationFailureHandler() {
         return new SimpleUrlAuthenticationFailureHandler();
     }
+
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity httpSecurity, AuthenticationFailureHandler authenticationFailureHandler) throws Exception {
         httpSecurity.authorizeHttpRequests(urlPatterns -> urlPatterns
-                .requestMatchers(
-                        mvc().pattern("/admin")
-                ).hasRole("ADMIN")
+                        .requestMatchers(
+                                mvc().pattern("/admin")
+                        ).hasRole("ADMIN")
 
-                .requestMatchers(
-                        mvc().pattern("/message/get/all")
-                ).authenticated()
-                .anyRequest().permitAll())
+                        .requestMatchers(
+                                mvc().pattern("/message/get/all")
+                        ).authenticated()
+                        .anyRequest().permitAll())
 
                 .sessionManagement(sessions -> {
                     sessions.maximumSessions(1);
@@ -80,7 +82,7 @@ public class SecurityConfig {
                     logout.deleteCookies("JSESSIONID", "remove");
                     logout.logoutRequestMatcher(mvc().pattern("/logout"));
                     logout.logoutUrl("/logout").clearAuthentication(true);
-//                    logout.invalidateHttpSession(true);
+                    logout.invalidateHttpSession(true);
                     logout.logoutSuccessUrl("/");
                 })
                 .formLogin(form -> {
@@ -93,15 +95,13 @@ public class SecurityConfig {
                     }
                 })
                 .csrf(csrf -> {
-                    try {
-                        csrf.init(httpSecurity);
-                    } catch (Exception e) {
-                        throw new RuntimeException(e);
-                    }
-                }
-                )
-        ;
-
+                            try {
+                                csrf.init(httpSecurity);
+                            } catch (Exception e) {
+                                throw new RuntimeException(e);
+                            }
+                        }
+                );
         return httpSecurity.build();
     }
 }
