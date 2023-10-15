@@ -1,5 +1,6 @@
 package com.pastebin.controller;
 
+import com.pastebin.dto.UserDTO;
 import com.pastebin.entity.User;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -10,14 +11,14 @@ public class RootMapping {
 
     @RequestMapping(value = "/register")
     public String register(Model model) {
-        model.addAttribute("user", new User());
+        model.addAttribute("user_dto", new UserDTO());
 
         return "registration";
     }
 
     @RequestMapping(value = "/login")
     public String login(Model model) {
-        model.addAttribute("user", new User());
+        model.addAttribute("user_dto", new UserDTO());
 
         return "/login";
     }

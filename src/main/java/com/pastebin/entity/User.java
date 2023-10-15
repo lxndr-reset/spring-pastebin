@@ -15,22 +15,27 @@ import java.util.Set;
 public class User {
     private static final Logger logger = LoggerFactory.getLogger(User.class);
     private static final PasswordEncoder encoder = new BCryptPasswordEncoder();
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "user_id")
     private Long userId;
+
     @Column(name = "email")
     private String email;
+
     @Column(name = "pass_bcrypt")
     private String pass_bcrypt;
+
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JsonIgnore
     private Set<Message> allUsersMessages;
 
 
-    public User(String email, String rawPassword) {
-        this.setEmail(email);
+    public User(String email, char[] rawPassword) {
         this.setPass_bcrypt(rawPassword);
+        rawPassword = new char[0];
+        this.setEmail(email);
     }
 
     public User() {
@@ -84,8 +89,13 @@ public class User {
         return pass_bcrypt;
     }
 
-    public void setPass_bcrypt(String rawPass) {
-        this.pass_bcrypt = encoder.encode(rawPass);
+    public void setPass_bcrypt(char[] rawPass) {
+        this.pass_bcrypt = encoder.encode(new String(rawPass));
+        rawPass = new char[0];
+
+        if (encoder.matches("", pass_bcrypt)) {
+            logger.error("Incoming password is empty");
+        }
     }
 
     public Set<Message> getAllUsersMessages() {

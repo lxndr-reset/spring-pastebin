@@ -1,5 +1,6 @@
 package com.pastebin.controller;
 
+import com.pastebin.dto.UserDTO;
 import com.pastebin.entity.User;
 import com.pastebin.service.UserDetailsService;
 import com.pastebin.service.UserService;
@@ -43,12 +44,24 @@ public class UserMapping {
         this.passwordEncoder = passwordEncoder;
     }
 
+    //    @RequestMapping(value = "/save", method = RequestMethod.POST)
+//    public String save(@ModelAttribute("user") User user, Model model,
+//                       @ModelAttribute("password") String password) {
+//
+//
+//        user.setPass_bcrypt(password);
+//        logger.info("User {} entered save method", user.getEmail());
+//        userService.save(user);
+//        logger.info("User {} was saved!", user.getEmail());
+//
+//        setAuthenticationInContextHolder(user);
+//
+//        return "welcome";
+//    }
     @RequestMapping(value = "/save", method = RequestMethod.POST)
-    public String save(@ModelAttribute("user") User user, Model model,
-                       @ModelAttribute("password") String password) {
+    public String save(@ModelAttribute("user_dto") UserDTO userDTO) {
+        User user = new User(userDTO.getEmail(), userDTO.getPassword());
 
-
-        user.setPass_bcrypt(password);
         logger.info("User {} entered save method", user.getEmail());
         userService.save(user);
         logger.info("User {} was saved!", user.getEmail());
@@ -59,10 +72,10 @@ public class UserMapping {
     }
 
     @RequestMapping(value = "/perform_login", method = RequestMethod.POST)
-    public void login(Model model, @ModelAttribute("user") User user, @ModelAttribute("password") String password) {
-        User compareUser = userService.findUserByEmail(user.getEmail());
+    public void login(@ModelAttribute("user_dto") UserDTO userDTO) {
+        User user = userService.findUserByEmail(userDTO.getEmail());
 
-        boolean matches = passwordEncoder.matches(password, compareUser.getPass_bcrypt());
+        boolean matches = passwordEncoder.matches(new String(userDTO.getPassword()), user.getPass_bcrypt());
         if (matches) {
             setAuthenticationInContextHolder(user);
         }
