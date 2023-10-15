@@ -20,6 +20,6 @@ public class RootMapping {
     public String login(Model model) {
         model.addAttribute("user_dto", new UserDTO());
 
-        return "/login";
+        return "login";
     }
 }

@@ -9,8 +9,8 @@ import org.springframework.security.authentication.dao.DaoAuthenticationProvider
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.context.SecurityContextHolderStrategy;
+import org.springframework.security.config.annotation.web.oauth2.client.OAuth2ClientSecurityMarker;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
@@ -49,6 +49,15 @@ public class SecurityConfig {
     }
 
     @Bean
+    public DaoAuthenticationProvider daoAuthenticationProvider() {
+        DaoAuthenticationProvider daoAuthenticationProvider = new DaoAuthenticationProvider();
+        daoAuthenticationProvider.setPasswordEncoder(passwordEncoder());
+        daoAuthenticationProvider.setUserDetailsService(userDetailsService);
+
+        return daoAuthenticationProvider;
+    }
+
+    @Bean
     public AuthenticationProvider authenticationProvider(PasswordEncoder passwordEncoder) {
         DaoAuthenticationProvider provider = new DaoAuthenticationProvider();
         provider.setUserDetailsService(userDetailsService);
@@ -66,14 +75,13 @@ public class SecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity httpSecurity, AuthenticationFailureHandler authenticationFailureHandler) throws Exception {
         httpSecurity.authorizeHttpRequests(urlPatterns -> urlPatterns
                         .requestMatchers(
-                                mvc().pattern("/admin")
+                                mvc().pattern("/admin/**")
                         ).hasRole("ADMIN")
 
                         .requestMatchers(
                                 mvc().pattern("/message/get/all")
-                        ).authenticated()
+                        ).hasAuthority("AUTHORIZED")
                         .anyRequest().permitAll())
-
                 .sessionManagement(sessions -> {
                     sessions.maximumSessions(1);
                 })

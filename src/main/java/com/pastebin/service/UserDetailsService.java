@@ -2,11 +2,13 @@ package com.pastebin.service;
 
 import com.pastebin.entity.User;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.List;
 
 @Service
 public class UserDetailsService implements org.springframework.security.core.userdetails.UserDetailsService {
@@ -23,7 +25,7 @@ public class UserDetailsService implements org.springframework.security.core.use
         return new org.springframework.security.core.userdetails.User(user.getEmail(), user.getPass_bcrypt(), new ArrayList<>());
     }
 
-    public UserDetails loadUserByEntity(User user) {
-        return new org.springframework.security.core.userdetails.User(user.getEmail(), user.getPass_bcrypt(), new ArrayList<>());
+    public UserDetails loadAuthorizedUserByEntity(User user) {
+        return new org.springframework.security.core.userdetails.User(user.getEmail(), user.getPass_bcrypt(), List.of(new SimpleGrantedAuthority("AUTHORIZED")));
     }
 }

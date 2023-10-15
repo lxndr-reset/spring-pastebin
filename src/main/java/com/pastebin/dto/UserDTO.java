@@ -19,7 +19,6 @@ public class UserDTO {
     public String toString() {
         return "UserDTO{" +
                 "email='" + email + '\'' +
-                ", password=" + Arrays.toString(password) +
                 '}';
     }
 
