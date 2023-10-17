@@ -26,6 +26,6 @@ public class UserDetailsService implements org.springframework.security.core.use
     }
 
     public UserDetails loadAuthorizedUserByEntity(User user) {
-        return new org.springframework.security.core.userdetails.User(user.getEmail(), user.getPass_bcrypt(), List.of(new SimpleGrantedAuthority("AUTHORIZED")));
+        return new org.springframework.security.core.userdetails.User(user.getEmail(), user.getPass_bcrypt(), List.of(new SimpleGrantedAuthority("ROLE_USER")));
     }
 }

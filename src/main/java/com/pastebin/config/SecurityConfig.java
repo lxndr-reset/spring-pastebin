@@ -4,13 +4,14 @@ import com.pastebin.service.UserDetailsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
+import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.config.annotation.web.oauth2.client.OAuth2ClientSecurityMarker;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.config.annotation.web.configuration.WebSecurityConfiguration;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
@@ -26,6 +27,7 @@ public class SecurityConfig {
     private final AuthenticationManagerBuilder authenticationManagerBuilder;
     private final UserDetailsService userDetailsService;
 
+
     @Autowired
     public SecurityConfig(HandlerMappingIntrospector handlerMappingIntrospector,
                           AuthenticationManagerBuilder authenticationManagerBuilder, UserDetailsService userDetailsService) {
@@ -38,6 +40,10 @@ public class SecurityConfig {
         return introspector;
     }
 
+    @Bean
+    public AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration) throws Exception {
+        return authenticationConfiguration.getAuthenticationManager();
+    }
     @Bean
     public MvcRequestMatcher.Builder mvc() {
         return new MvcRequestMatcher.Builder(getIntrospector());
@@ -72,7 +78,8 @@ public class SecurityConfig {
     }
 
     @Bean
-    public SecurityFilterChain filterChain(HttpSecurity httpSecurity, AuthenticationFailureHandler authenticationFailureHandler) throws Exception {
+    public SecurityFilterChain filterChain(HttpSecurity httpSecurity, AuthenticationFailureHandler authenticationFailureHandler,
+                                           AuthenticationConfiguration authenticationConfiguration) throws Exception {
         httpSecurity.authorizeHttpRequests(urlPatterns -> urlPatterns
                         .requestMatchers(
                                 mvc().pattern("/admin/**")
@@ -80,12 +87,12 @@ public class SecurityConfig {
 
                         .requestMatchers(
                                 mvc().pattern("/message/get/all")
-                        ).hasAuthority("AUTHORIZED")
+                        ).hasAnyAuthority("USER")
                         .anyRequest().permitAll())
                 .sessionManagement(sessions -> {
                     sessions.maximumSessions(1);
                 })
-                .authenticationManager(authenticationManagerBuilder.getOrBuild())
+                .authenticationManager(authenticationConfiguration.getAuthenticationManager())
                 .logout(logout -> {
                     logout.deleteCookies("JSESSIONID", "remove");
                     logout.logoutRequestMatcher(mvc().pattern("/logout"));
@@ -93,15 +100,14 @@ public class SecurityConfig {
                     logout.invalidateHttpSession(true);
                     logout.logoutSuccessUrl("/");
                 })
-                .formLogin(form -> {
-                    try {
-                        form.loginPage("/login");
-                        form.failureUrl("/");
-                        form.failureHandler(authenticationFailureHandler);
-                    } catch (Exception e) {
-                        throw new RuntimeException(e);
-                    }
-                })
+//                .formLogin(form -> {
+//                    try {
+//                        form.loginPage("/login");
+//                        form.failureHandler(authenticationFailureHandler);
+//                    } catch (Exception e) {
+//                        throw new RuntimeException(e);
+//                    }
+//                })
                 .csrf(csrf -> {
                             try {
                                 csrf.init(httpSecurity);

@@ -5,17 +5,16 @@ import com.pastebin.entity.User;
 import com.pastebin.service.UserDetailsService;
 import com.pastebin.service.UserService;
 import com.pastebin.util.SecurityUtils;
-import jakarta.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolderStrategy;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -23,6 +22,7 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
+import java.util.Collections;
 import java.util.NoSuchElementException;
 
 @Controller
@@ -32,23 +32,19 @@ public class UserMapping {
     private final Logger logger = LoggerFactory.getLogger(UserMapping.class);
     private final UserDetailsService userDetailsService;
     private final AuthenticationProvider authenticationProvider;
-    private final HttpServletResponse httpServletResponse;
     private final PasswordEncoder passwordEncoder;
     private final SecurityContextHolderStrategy securityContextStrategy = SecurityUtils.securityContextHolderStrategy();
-    private final DaoAuthenticationProvider daoAuthenticationProvider;
-
+    private final AuthenticationManager authenticationManager;
 
     @Autowired
-    public UserMapping(UserService userService
-            , UserDetailsService userDetailsService, AuthenticationProvider authenticationProvider,
-                       HttpServletResponse httpServletResponse, PasswordEncoder passwordEncoder,
-                       DaoAuthenticationProvider daoAuthenticationProvider) {
+    public UserMapping(UserService userService, UserDetailsService userDetailsService,
+                       AuthenticationProvider authenticationProvider, PasswordEncoder passwordEncoder,
+                       AuthenticationManager authenticationManager) {
         this.userService = userService;
         this.userDetailsService = userDetailsService;
         this.authenticationProvider = authenticationProvider;
-        this.httpServletResponse = httpServletResponse;
         this.passwordEncoder = passwordEncoder;
-        this.daoAuthenticationProvider = daoAuthenticationProvider;
+        this.authenticationManager = authenticationManager;
     }
 
     @RequestMapping(value = "/save", method = RequestMethod.POST)
@@ -59,7 +55,8 @@ public class UserMapping {
         userService.save(user);
         logger.info("User {} was saved!", user.getEmail());
 
-        setAuthenticationInContextHolder(user);
+        setAuthenticationInContextHolder(userDTO);
+        userDTO = null;
         model.addAttribute("user", user);
 
         return "welcome";
@@ -71,41 +68,24 @@ public class UserMapping {
 
         boolean matches = passwordEncoder.matches(new String(userDTO.getPassword()), user.getPass_bcrypt());
         if (matches) {
-            setAuthenticationInContextHolder(user);
+            setAuthenticationInContextHolder(userDTO);
+            userDTO = null;
             model.addAttribute("user", user);
+
             return "welcome";
         }
 
         throw new NoSuchElementException("Wrong credentials! Try again. http://localhost:8080/login");
     }
 
-    public void setAuthenticationInContextHolder(User user) {
-        UserDetails userDetails = userDetailsService.loadAuthorizedUserByEntity(user);
-
-        Authentication authReq = new UsernamePasswordAuthenticationToken("test", "test",
-                userDetails.getAuthorities());
-
-        logger.info(user.toString());
-        logger.info(userDetails.toString());
-        logger.info(userDetails.getPassword());
+    public void setAuthenticationInContextHolder(UserDTO userDTO) {
+        Authentication authReq = new UsernamePasswordAuthenticationToken(userDTO.getEmail(), new String(userDTO.getPassword()),
+                Collections.singletonList(new SimpleGrantedAuthority("ROLE_USER")));
+        authenticationManager.authenticate(authReq);
         SecurityContext context = securityContextStrategy.getContext();
-
-
         authenticationProvider.authenticate(authReq);
-        logger.info("=======================================");
-        logger.info(authReq.getCredentials().toString());
-        logger.info(context.getAuthentication().toString());
-
         context.setAuthentication(authReq);
-        logger.info("=======================================");
-        logger.info(authReq.getCredentials().toString());
-        logger.info(context.getAuthentication().toString());
 
-//        daoAuthenticationProvider.authenticate(authReq);
-//        logger.info("=======================================");
-//        logger.info(authReq.getCredentials().toString());
-//        logger.info(context.getAuthentication().toString());
-//
-
+        logger.info(String.valueOf(authReq.isAuthenticated()));
     }
 }
