@@ -80,7 +80,6 @@ public class User {
 
     public void setEmail(String s) {
         if (s == null || s.isEmpty() || !s.matches("^[a-zA-Z0-9._+-]+@[a-zA-Z0-9-._]+\\.[a-zA-Z]+$")) {
-            logger.info("Wrong email: {}", s);
             throw new NoSuchElementException("Wrong details");
         }
         this.email = s;

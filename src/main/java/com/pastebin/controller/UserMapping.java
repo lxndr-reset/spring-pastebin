@@ -51,9 +51,7 @@ public class UserMapping {
     public String save(@ModelAttribute("user_dto") UserDTO userDTO, Model model) {
         User user = new User(userDTO.getEmail(), userDTO.getPassword());
 
-        logger.info("User {} entered save method", user.getEmail());
         userService.save(user);
-        logger.info("User {} was saved!", user.getEmail());
 
         setAuthenticationInContextHolder(userDTO);
         userDTO = null;
@@ -86,6 +84,5 @@ public class UserMapping {
         authenticationProvider.authenticate(authReq);
         context.setAuthentication(authReq);
 
-        logger.info(String.valueOf(authReq.isAuthenticated()));
     }
 }

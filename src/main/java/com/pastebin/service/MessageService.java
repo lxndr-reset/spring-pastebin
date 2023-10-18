@@ -3,6 +3,9 @@ package com.pastebin.service;
 import com.pastebin.annotation.AvailableMessages;
 import com.pastebin.entity.Message;
 import com.pastebin.repository.MessageRepo;
+import com.zaxxer.hikari.HikariDataSource;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.CachePut;
@@ -11,6 +14,7 @@ import org.springframework.cache.annotation.Caching;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.sql.DataSource;
 import java.sql.Timestamp;
 import java.util.NoSuchElementException;
 import java.util.Optional;
@@ -19,10 +23,13 @@ import java.util.Optional;
 @Transactional
 public class MessageService {
     private final MessageRepo messageRepo;
+    private final HikariDataSource dataSource;
+    private final Logger logger = LoggerFactory.getLogger(MessageService.class);
 
     @Autowired
-    public MessageService(MessageRepo messageRepo) {
+    public MessageService(MessageRepo messageRepo, DataSource dataSource) {
         this.messageRepo = messageRepo;
+        this.dataSource = ((HikariDataSource) dataSource);
     }
 
     @AvailableMessages
