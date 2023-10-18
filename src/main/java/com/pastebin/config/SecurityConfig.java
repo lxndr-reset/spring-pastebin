@@ -24,15 +24,12 @@ import org.springframework.web.servlet.handler.HandlerMappingIntrospector;
 @EnableWebSecurity
 public class SecurityConfig {
     private final HandlerMappingIntrospector introspector;
-    private final AuthenticationManagerBuilder authenticationManagerBuilder;
     private final UserDetailsService userDetailsService;
 
 
     @Autowired
-    public SecurityConfig(HandlerMappingIntrospector handlerMappingIntrospector,
-                          AuthenticationManagerBuilder authenticationManagerBuilder, UserDetailsService userDetailsService) {
+    public SecurityConfig(HandlerMappingIntrospector handlerMappingIntrospector, UserDetailsService userDetailsService) {
         this.introspector = handlerMappingIntrospector;
-        this.authenticationManagerBuilder = authenticationManagerBuilder;
         this.userDetailsService = userDetailsService;
     }
 
