@@ -22,14 +22,18 @@
         <div class="card-body">
             <div class="form-group">
                 <label for="input-email">Email:</label>
-                <span th:text="${user.email}"></span>
+                <span th:object="${user}" th:text="${user.email}"></span>
             </div>
             <div class="all-messages">
                 <label for="input-email">All your messages:</label>
                 <table>
+                    <tr>
+                        <td>ID:     </td>
+                        <td>MESSAGE</td>
+                    </tr>
                     <tr th:each="message : ${user.allUsersMessages}">
-                        <td th:text="${message.messageId}"></td>
-                        <td th:text="${message.text}"></td>
+                        <td th:text="${message.getId()}"></td>
+                        <td th:text="${message.getValue()}"></td>
                     </tr>
                 </table>
             </div>
