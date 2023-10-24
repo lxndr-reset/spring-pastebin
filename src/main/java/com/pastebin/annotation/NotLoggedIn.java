@@ -9,5 +9,5 @@ import static java.lang.annotation.ElementType.TYPE;
 
 @Target({METHOD, TYPE})
 @Retention(RetentionPolicy.RUNTIME)
-public @interface OnlyLoggedIn {
+public @interface NotLoggedIn {
 }

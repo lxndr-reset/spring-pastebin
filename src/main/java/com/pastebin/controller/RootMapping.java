@@ -1,7 +1,7 @@
 package com.pastebin.controller;
 
+import com.pastebin.annotation.NotLoggedIn;
 import com.pastebin.dto.UserDTO;
-import com.pastebin.entity.User;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 public class RootMapping {
 
     @RequestMapping(value = "/register")
+    @NotLoggedIn
     public String register(Model model) {
         model.addAttribute("user_dto", new UserDTO());
 
@@ -17,6 +18,7 @@ public class RootMapping {
     }
 
     @RequestMapping(value = "/login")
+    @NotLoggedIn
     public String login(Model model) {
         model.addAttribute("user_dto", new UserDTO());
 

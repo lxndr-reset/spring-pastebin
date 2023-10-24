@@ -1,20 +1,25 @@
 package com.pastebin.aspect;
 
+import com.pastebin.auth.AuthenticationStatus;
 import com.pastebin.exception.NotAuthenticatedException;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Before;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
+
+import java.nio.file.AccessDeniedException;
 
 @Aspect
 @Component
 public class CheckIfUserLoggedIn {
-    @Before("@annotation(com.pastebin.annotation.OnlyLoggedIn)")
-    public void checkAuthentication() throws NotAuthenticatedException {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+    private final AuthenticationStatus authenticationStatus;
 
-        if (authentication == null || !authentication.isAuthenticated()) {
-            throw new NotAuthenticatedException();
+    public CheckIfUserLoggedIn(AuthenticationStatus authenticationStatus) {
+        this.authenticationStatus = authenticationStatus;
+    }
+
+    @Before("@annotation(com.pastebin.annotation.NotLoggedIn)")
+    public void checkAuthentication() {
+        if (authenticationStatus.isUserAuthenticated()){
+            throw new RuntimeException("User already logged in");
         }
     }}

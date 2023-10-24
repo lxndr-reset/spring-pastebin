@@ -35,18 +35,28 @@ public class AuthenticationStatus {
     }
 
     public boolean isUserAuthenticated() {
-        return SecurityContextHolder.getContext().getAuthentication().isAuthenticated();
+        try {
+            return getSecurityContext().getAuthentication().isAuthenticated();
+        }
+        catch (NullPointerException e){
+            return false;
+        }
     }
-    public User getAuthenticatedUser(){
-        SecurityContext securityContext = (SecurityContext) session.getAttribute(HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY);
+
+    public User getAuthenticatedUser() {
+        SecurityContext securityContext = getSecurityContext();
         return new User(securityContext.getAuthentication().getPrincipal().toString(), "[PROTECTED]");
+    }
+
+    private SecurityContext getSecurityContext() {
+        return (SecurityContext) session.getAttribute(HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY);
     }
 
     /**
      * Authenticates a user based on the provided userDTO.
      *
      * @param userDTO the user data transfer object containing the email and password
-     * @param <T> the type of userDTO
+     * @param <T>     the type of userDTO
      */
     public <T extends UserDTO> void authenticateUser(T userDTO) {
         UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken =
