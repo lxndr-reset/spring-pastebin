@@ -23,13 +23,11 @@ import java.util.Optional;
 @Transactional
 public class MessageService {
     private final MessageRepo messageRepo;
-    private final HikariDataSource dataSource;
     private final Logger logger = LoggerFactory.getLogger(MessageService.class);
 
     @Autowired
-    public MessageService(MessageRepo messageRepo, DataSource dataSource) {
+    public MessageService(MessageRepo messageRepo) {
         this.messageRepo = messageRepo;
-        this.dataSource = ((HikariDataSource) dataSource);
     }
 
     @AvailableMessages

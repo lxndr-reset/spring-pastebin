@@ -1,5 +1,6 @@
 package com.pastebin.controller;
 
+import com.pastebin.auth.AuthenticationStatus;
 import com.pastebin.entity.Message;
 import com.pastebin.entity.ShortURL;
 import com.pastebin.entity.User;
@@ -11,27 +12,25 @@ import jakarta.servlet.http.HttpSession;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.context.SecurityContext;
-import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 
-import java.util.Objects;
-
 @Controller
 @RequestMapping("/message")
 public class MessageMapping {
     private final MessageService messageService;
     private final ShortURLService shortURLService;
+    private final AuthenticationStatus authenticationStatus;
     private final Logger logger = LoggerFactory.getLogger(MessageMapping.class);
 
     @Autowired
-    public MessageMapping(MessageService messageService, ShortURLService shortURLService) {
+    public MessageMapping(MessageService messageService, ShortURLService shortURLService, AuthenticationStatus authenticationStatus) {
         this.messageService = messageService;
         this.shortURLService = shortURLService;
+        this.authenticationStatus = authenticationStatus;
     }
 
     private static ValidTime getValidTimeDate(String stringDeletionDate) {
@@ -52,18 +51,15 @@ public class MessageMapping {
     }
 
     @RequestMapping("/get/all")
-    public String getAllUsersMessages(Model model, @ModelAttribute("user") User user, @ModelAttribute("email") String enteredEmail,
-                                      HttpSession session) {
-
-        SecurityContext securityContext = (SecurityContext) session.getAttribute(HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY);
-        if (Objects.equals(user.getEmail(), enteredEmail) || securityContext != null && securityContext.getAuthentication() != null &&
-                securityContext.getAuthentication().isAuthenticated()) {
-
-            model.addAttribute("user", new User(securityContext.getAuthentication().getPrincipal().toString(), "[PROTECTED]"));
-            return "welcome";
+    public String getAllUsersMessages(Model model, @ModelAttribute("user") User user, @ModelAttribute("email") String enteredEmail) {
+        User authenticatedUser = authenticationStatus.getAuthenticatedUser();
+        if (authenticatedUser.getEmail().isEmpty()) {
+            return "redirect:/";
         }
+        model.addAttribute("user", authenticatedUser);
 
-        return "redirect:/";
+        return "welcome";
+
     }
 
     @RequestMapping("/new/{content}/{stringDeletionDate}")

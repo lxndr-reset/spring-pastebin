@@ -26,24 +26,19 @@ public class User {
     private String email;
 
     @Column(name = "pass_bcrypt")
-    private String pass_bcrypt;
+    private String password;
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JsonIgnore
     private Set<Message> allUsersMessages;
 
 
-    public User(String email, char[] rawPassword) {
-        this.setPass_bcrypt(rawPassword);
-        rawPassword = new char[0];
+    public User(String email, String rawPassword) {
+        this.setPassword(rawPassword);
         this.setEmail(email);
     }
 
     public User() {
-    }
-
-    private static String hashPassword(char[] rawPass) {
-        return encoder.encode(new String(rawPass));
     }
 
     @Override
@@ -85,17 +80,12 @@ public class User {
         this.email = s;
     }
 
-    public String getPass_bcrypt() {
-        return pass_bcrypt;
+    public String getPassword() {
+        return password;
     }
 
-    public void setPass_bcrypt(char[] rawPass) {
-        this.pass_bcrypt = encoder.encode(new String(rawPass));
-        rawPass = new char[0];
-
-        if (encoder.matches("", pass_bcrypt)) {
-            logger.error("Incoming password is empty");
-        }
+    public void setPassword(String rawPass) {
+        this.password = rawPass;
     }
 
     public Set<Message> getAllUsersMessages() {

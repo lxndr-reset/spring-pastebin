@@ -4,6 +4,7 @@ import com.pastebin.service.UserDetailsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
@@ -29,7 +30,7 @@ public class SecurityConfig {
 
 
     @Autowired
-    public SecurityConfig(HandlerMappingIntrospector handlerMappingIntrospector, UserDetailsService userDetailsService) {
+    public SecurityConfig(HandlerMappingIntrospector handlerMappingIntrospector, @Lazy UserDetailsService userDetailsService) {
         this.introspector = handlerMappingIntrospector;
         this.userDetailsService = userDetailsService;
     }
@@ -65,23 +66,6 @@ public class SecurityConfig {
         return new BCryptPasswordEncoder();
     }
 
-    @Bean
-    public DaoAuthenticationProvider daoAuthenticationProvider() {
-        DaoAuthenticationProvider daoAuthenticationProvider = new DaoAuthenticationProvider();
-        daoAuthenticationProvider.setPasswordEncoder(passwordEncoder());
-        daoAuthenticationProvider.setUserDetailsService(userDetailsService);
-
-        return daoAuthenticationProvider;
-    }
-
-    @Bean
-    public AuthenticationProvider authenticationProvider(PasswordEncoder passwordEncoder) {
-        DaoAuthenticationProvider provider = new DaoAuthenticationProvider();
-        provider.setUserDetailsService(userDetailsService);
-        provider.setPasswordEncoder(passwordEncoder);
-        return provider;
-    }
-
 
     @Bean
     public AuthenticationFailureHandler authenticationFailureHandler() {
@@ -89,7 +73,7 @@ public class SecurityConfig {
     }
 
     @Bean
-    public SecurityFilterChain filterChain(HttpSecurity httpSecurity, AuthenticationFailureHandler authenticationFailureHandler,
+    public SecurityFilterChain filterChain(HttpSecurity httpSecurity,
                                            AuthenticationConfiguration authenticationConfiguration) throws Exception {
         httpSecurity.authorizeHttpRequests(urlPatterns -> urlPatterns
                         .requestMatchers(
@@ -98,7 +82,7 @@ public class SecurityConfig {
 
                         .requestMatchers(
                                 mvc().pattern("/message/get/all")
-                        ).hasAuthority("USER")
+                        ).authenticated()
                         .anyRequest().permitAll())
                 .sessionManagement(sessions -> {
                     sessions.maximumSessions(1);
@@ -111,14 +95,13 @@ public class SecurityConfig {
                     logout.invalidateHttpSession(true);
                     logout.logoutSuccessUrl("/");
                 })
-//                .formLogin(form -> {
-//                    try {
-//                        form.loginPage("/login");
-//                        form.failureHandler(authenticationFailureHandler);
-//                    } catch (Exception e) {
-//                        throw new RuntimeException(e);
-//                    }
-//                })
+                .formLogin(form -> {
+                    try {
+                        form.loginPage("/login");
+                    } catch (Exception e) {
+                        throw new RuntimeException(e);
+                    }
+                })
                 .csrf(csrf -> {
                             try {
                                 csrf.init(httpSecurity);

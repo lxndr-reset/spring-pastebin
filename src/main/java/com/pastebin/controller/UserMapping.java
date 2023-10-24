@@ -1,6 +1,6 @@
 package com.pastebin.controller;
 
-import com.pastebin.auth.Authentication;
+import com.pastebin.auth.AuthenticationStatus;
 import com.pastebin.dto.UserDTO;
 import com.pastebin.entity.User;
 import com.pastebin.service.UserService;
@@ -22,13 +22,13 @@ public class UserMapping {
     private final UserService userService;
     private final Logger logger = LoggerFactory.getLogger(UserMapping.class);
     private final PasswordEncoder passwordEncoder;
-    private final Authentication authentication;
+    private final AuthenticationStatus authenticationStatus;
 
     @Autowired
-    public UserMapping(UserService userService, PasswordEncoder passwordEncoder, Authentication authentication) {
+    public UserMapping(UserService userService, PasswordEncoder passwordEncoder, AuthenticationStatus authenticationStatus) {
         this.userService = userService;
         this.passwordEncoder = passwordEncoder;
-        this.authentication = authentication;
+        this.authenticationStatus = authenticationStatus;
     }
 
     @RequestMapping(value = "/save", method = RequestMethod.POST)
@@ -56,7 +56,7 @@ public class UserMapping {
     }
 
     private void authenticateAndAddUserToModel(UserDTO userDTO, Model model, User user) { //todo make method use userDetails except userDTO
-        authentication.authenticateUser(userDTO);
+        authenticationStatus.authenticateUser(userDTO);
         userDTO = null;
         model.addAttribute("user", user);
     }
