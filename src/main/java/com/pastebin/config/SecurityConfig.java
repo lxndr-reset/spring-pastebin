@@ -11,7 +11,8 @@ import org.springframework.security.config.annotation.authentication.builders.Au
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.config.annotation.web.configuration.WebSecurityConfiguration;
+import org.springframework.security.core.session.SessionRegistry;
+import org.springframework.security.core.session.SessionRegistryImpl;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
@@ -33,17 +34,30 @@ public class SecurityConfig {
         this.userDetailsService = userDetailsService;
     }
 
-    public HandlerMappingIntrospector getIntrospector() {
+    public HandlerMappingIntrospector getHandlerMappingIntrospector() {
         return introspector;
     }
 
     @Bean
-    public AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration) throws Exception {
-        return authenticationConfiguration.getAuthenticationManager();
+    public SessionRegistry sessionRegistry() {
+        return new SessionRegistryImpl();
     }
+
+    @Bean
+    public AuthenticationManager authenticationManager(HttpSecurity httpSecurity) {
+        AuthenticationManagerBuilder builder = httpSecurity.getSharedObject(AuthenticationManagerBuilder.class);
+
+        try {
+            builder.userDetailsService(userDetailsService).passwordEncoder(passwordEncoder());
+            return builder.build();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     @Bean
     public MvcRequestMatcher.Builder mvc() {
-        return new MvcRequestMatcher.Builder(getIntrospector());
+        return new MvcRequestMatcher.Builder(getHandlerMappingIntrospector());
     }
 
     @Bean
@@ -84,7 +98,7 @@ public class SecurityConfig {
 
                         .requestMatchers(
                                 mvc().pattern("/message/get/all")
-                        ).hasAnyAuthority("USER")
+                        ).hasAuthority("USER")
                         .anyRequest().permitAll())
                 .sessionManagement(sessions -> {
                     sessions.maximumSessions(1);

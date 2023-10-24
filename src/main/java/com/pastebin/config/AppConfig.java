@@ -32,7 +32,7 @@ public class AppConfig {
     @Bean
     public Executor executor() {
         ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
-        executor.setCorePoolSize(5);
+        executor.setCorePoolSize(2);
         executor.setMaxPoolSize(Runtime.getRuntime().availableProcessors());
         executor.setThreadNamePrefix("CustomAsyncExecutor-");
         executor.initialize();
