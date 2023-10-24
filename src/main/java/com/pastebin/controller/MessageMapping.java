@@ -5,21 +5,28 @@ import com.pastebin.entity.ShortURL;
 import com.pastebin.entity.User;
 import com.pastebin.entity.date.ValidTime;
 import com.pastebin.exception.NoAvailableShortURLException;
-import com.pastebin.exception.NotAuthenticatedException;
 import com.pastebin.service.MessageService;
 import com.pastebin.service.ShortURLService;
+import jakarta.servlet.http.HttpSession;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 
+import java.util.Objects;
+
 @Controller
 @RequestMapping("/message")
 public class MessageMapping {
     private final MessageService messageService;
     private final ShortURLService shortURLService;
+    private final Logger logger = LoggerFactory.getLogger(MessageMapping.class);
 
     @Autowired
     public MessageMapping(MessageService messageService, ShortURLService shortURLService) {
@@ -45,10 +52,17 @@ public class MessageMapping {
     }
 
     @RequestMapping("/get/all")
-    public String getAllUsersMessages(@ModelAttribute("user") User user, @ModelAttribute("email") String email) throws NotAuthenticatedException {
-        if (user != null && user.getEmail() != null && user.getEmail().equals(email)) {
-            return "user";
+    public String getAllUsersMessages(Model model, @ModelAttribute("user") User user, @ModelAttribute("email") String enteredEmail,
+                                      HttpSession session) {
+
+        SecurityContext securityContext = (SecurityContext) session.getAttribute(HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY);
+        if (Objects.equals(user.getEmail(), enteredEmail) || securityContext != null && securityContext.getAuthentication() != null &&
+                securityContext.getAuthentication().isAuthenticated()) {
+
+            model.addAttribute("user", new User(securityContext.getAuthentication().getPrincipal().toString(), "[PROTECTED]"));
+            return "welcome";
         }
+
         return "redirect:/";
     }
 
