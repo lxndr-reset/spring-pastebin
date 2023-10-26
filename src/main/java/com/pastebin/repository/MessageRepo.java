@@ -23,6 +23,6 @@ public interface MessageRepo extends JpaRepository<Message, Long> {
     @Modifying
     @Transactional
     @Query("delete from Message m where m.deleted = true or m.deletionDate <= :timestamp")
-    void deleteAllByDeletedIsTrueOrDeletionDateIsGreaterThanEqual(Timestamp timestamp);
+    List<Message> deleteAllByDeletedIsTrueOrDeletionDateIsGreaterThanEqual(Timestamp timestamp);
 
 }

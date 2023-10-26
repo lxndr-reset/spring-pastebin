@@ -11,11 +11,13 @@ import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.annotation.Caching;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.sql.DataSource;
 import java.sql.Timestamp;
+import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 
@@ -119,6 +121,9 @@ public class MessageService {
     }
 
     public void deleteAllByDeletedIsTrueOrDeletionDateIsGreaterThanEqual() {
-        messageRepo.deleteAllByDeletedIsTrueOrDeletionDateIsGreaterThanEqual(new Timestamp(System.currentTimeMillis()));
+        List<Message> messages = messageRepo.deleteAllByDeletedIsTrueOrDeletionDateIsGreaterThanEqual(
+                new Timestamp(System.currentTimeMillis()));
+
+        messages.forEach(this::invalidateMessageCacheValue);
     }
 }

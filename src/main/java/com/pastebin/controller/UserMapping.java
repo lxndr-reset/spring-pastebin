@@ -55,7 +55,7 @@ public class UserMapping {
         throw new NoSuchElementException("Wrong credentials! Try again. http://localhost:8080/login");
     }
 
-    private void authenticateAndAddUserToModel(UserDTO userDTO, Model model, User user) { //todo make method use userDetails except userDTO
+    private void authenticateAndAddUserToModel(UserDTO userDTO, Model model, User user) {
         authenticationStatus.authenticateUser(userDTO);
         userDTO = null;
         model.addAttribute("user", user);
