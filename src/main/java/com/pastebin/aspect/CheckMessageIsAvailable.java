@@ -9,13 +9,13 @@ import java.util.NoSuchElementException;
 
 @Aspect
 @Component
-public class CheckMessageIsExpired {
+public class CheckMessageIsAvailable {
     @AfterReturning(pointcut = "@annotation(com.pastebin.annotation.AvailableMessages)", returning = "result")
     public void aroundAdvice(Message result) {
 
         if (result.isDeleted() || (result.getDeletionDate() != null
                 && result.getDeletionDate().getTime() <= System.currentTimeMillis())) {
-            throw new NoSuchElementException("Element with link http://localhost:8080/message/get/" + result.
+            throw new NoSuchElementException("Element by link http://localhost:8080/message/get/" + result.
                     getShortURL().getUrlValue() + " was not found");
         }
     }

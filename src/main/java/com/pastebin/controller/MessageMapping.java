@@ -17,6 +17,8 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 
+import java.util.concurrent.ExecutionException;
+
 @Controller
 @RequestMapping("/message")
 public class MessageMapping {
@@ -42,8 +44,8 @@ public class MessageMapping {
     }
 
     @RequestMapping("/get/{value}")
-    public String getMessageByValue(Model model, @PathVariable String value) {
-        Message message = messageService.findByValue(value);
+    public String getMessageByValue(Model model, @PathVariable String value) throws ExecutionException, InterruptedException {
+        Message message = messageService.findByValue(value).get();
         model.addAttribute("message", message);
 
         return "get_message";
@@ -82,8 +84,8 @@ public class MessageMapping {
     }
 
     @RequestMapping("/edit/{value}/{content}")
-    public String editMessageContent(Model model, @PathVariable String value, @PathVariable String content) {
-        Message message = messageService.findByValue(value);
+    public String editMessageContent(Model model, @PathVariable String value, @PathVariable String content) throws ExecutionException, InterruptedException {
+        Message message = messageService.findByValue(value).get();
         message.setValue(content);
         messageService.save(message);
 
@@ -93,8 +95,8 @@ public class MessageMapping {
 
     @RequestMapping("/edit/{value}/{content}/{deletionDate}")
     public String editMessageContentAndDeletionDate(Model model, @PathVariable String value,
-                                                    @PathVariable String content, @PathVariable String deletionDate) {
-        Message message = messageService.findByValue(value);
+                                                    @PathVariable String content, @PathVariable String deletionDate) throws ExecutionException, InterruptedException {
+        Message message = messageService.findByValue(value).get();
         message.setValue(content);
         message.setDeletionDate(getValidTimeDate(deletionDate));
         messageService.save(message);
@@ -105,8 +107,8 @@ public class MessageMapping {
 
     @RequestMapping("/edit-time/{value}/{deletionDate}")
     public String editMessageDeletionDate(Model model, @PathVariable String value,
-                                          @PathVariable String deletionDate) {
-        Message message = messageService.findByValue(value);
+                                          @PathVariable String deletionDate) throws ExecutionException, InterruptedException {
+        Message message = messageService.findByValue(value).get();
         message.setDeletionDate(getValidTimeDate(deletionDate));
         messageService.save(message);
 
@@ -116,8 +118,8 @@ public class MessageMapping {
 
 
     @RequestMapping("/delete/{value}")
-    public String deleteMessage(Model model, @PathVariable String value) {
-        Message message = messageService.softDeleteByValue(value);
+    public String deleteMessage(Model model, @PathVariable String value) throws ExecutionException, InterruptedException {
+        Message message = messageService.softDeleteByValue(value).get();
         model.addAttribute("message", message);
 
         return "get_message";

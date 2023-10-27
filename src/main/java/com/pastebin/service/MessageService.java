@@ -12,7 +12,6 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.annotation.Caching;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.Timestamp;
 import java.util.List;
@@ -32,14 +31,15 @@ public class MessageService {
     }
 
     @AvailableMessages
+    @Async
     @Cacheable(value = "message", key = "#value", unless = "#result == null")
-    public Message findByValue(String value) {
+    public CompletableFuture<Message> findByValue(String value) {
         Optional<Message> byShortURLUrlValue = messageRepo.findMessageByShortURLUrlValue(value);
 
         if (byShortURLUrlValue.isPresent()) {
             Message message = byShortURLUrlValue.get();
             if (message != null && !message.isDeleted()) {
-                return message;
+                return CompletableFuture.completedFuture(message);
             }
         }
         throw new NoSuchElementException("Message on link https://localhost:8080/message/get/" + value + " does not exists");
@@ -47,21 +47,23 @@ public class MessageService {
 
     @AvailableMessages
     @Cacheable(value = "message", key = "#id")
-    public Message findById(Long id) {
+    @Async
+    public CompletableFuture<Message> findById(Long id) {
         Optional<Message> message = messageRepo.findById(id);
         if (message.isEmpty() || message.get().isDeleted() || System.currentTimeMillis() >
                 message.get().getDeletionDate().getTime()) {
             throw new NoSuchElementException("Message with id " + id + " not found");
         }
-        return message.get();
+        return CompletableFuture.completedFuture(message.get());
     }
 
     @CacheEvict(value = "message", key = "#value")
-    public Message softDeleteByValue(String value) {
+    @Async
+    public CompletableFuture<Message> softDeleteByValue(String value) {
         Optional<Message> byShortURLUrlValue = messageRepo.findMessageByShortURLUrlValue(value);
 
         Message message = softDeletedMessageIfExists(byShortURLUrlValue);
-        if (message != null) return message;
+        if (message != null) return CompletableFuture.completedFuture(message);
 
         throw new NoSuchElementException("Message on link https://localhost:8080/message/get/" + value + " does not exists");
     }
@@ -79,9 +81,10 @@ public class MessageService {
     }
 
     @CacheEvict(value = "message", key = "#id")
-    public Message softDeleteById(Long id) {
+    @Async
+    public CompletableFuture<Message> softDeleteById(Long id) {
         Message message = softDeletedMessageIfExists(messageRepo.findById(id));
-        if (message != null) return message;
+        if (message != null) return CompletableFuture.completedFuture(message);
 
         throw new NoSuchElementException("Message on link https://localhost:8080/message/get/" + id + " does not exists");
     }
@@ -95,7 +98,7 @@ public class MessageService {
         try {
             messageRepo.save(message);
         } catch (Exception e) {
-            invalidateMessageCacheValue(message);
+            invalidateMessageCache(message);
             throw e;
         }
     }
@@ -106,17 +109,15 @@ public class MessageService {
         messageRepo.deleteById(id);
     }
 
-    @Transactional
     public void deleteAllMessagesByDeleted() {
-        messageRepo.deleteAllByDeletedIsTrue().forEach(this::invalidateMessageCacheValue);
+        messageRepo.deleteAllByDeletedIsTrue().forEach(this::invalidateMessageCache);
     }
 
     @CacheEvict(value = "message", key = "#message.shortURL.urlValue")
-    public void invalidateMessageCacheValue(Message message) {
+    public void invalidateMessageCache(Message message) {
     }
 
     @CachePut(value = "message", key = "#message.shortURL.urlValue")
-    @Async
     public void validateMessageCache(Message message) {
     }
 
@@ -125,12 +126,13 @@ public class MessageService {
         List<Message> messages = messageRepo.deleteAllByDeletedIsTrueOrDeletionDateIsGreaterThanEqual(
                 new Timestamp(System.currentTimeMillis()));
 
-        messages.forEach(this::invalidateMessageCacheValue);
+        messages.forEach(this::invalidateMessageCache);
     }
 
     @Cacheable(value = "messages", key = "#email")
     public Set<Message> getMessagesByUser_Email(String email) {
         logger.info("Custom Message getter was used!");
+
         return messageRepo.getMessagesByUser_Email(email);
     }
 }
