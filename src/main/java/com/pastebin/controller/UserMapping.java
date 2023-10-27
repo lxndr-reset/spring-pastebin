@@ -24,14 +24,12 @@ public class UserMapping {
     private final UserService userService;
     private final Logger logger = LoggerFactory.getLogger(UserMapping.class);
     private final PasswordEncoder passwordEncoder;
-    private final MessageService messageService;
     private final AuthenticationStatus authenticationStatus;
 
     @Autowired
-    public UserMapping(UserService userService, PasswordEncoder passwordEncoder, MessageService messageService, AuthenticationStatus authenticationStatus) {
+    public UserMapping(UserService userService, PasswordEncoder passwordEncoder, AuthenticationStatus authenticationStatus) {
         this.userService = userService;
         this.passwordEncoder = passwordEncoder;
-        this.messageService = messageService;
         this.authenticationStatus = authenticationStatus;
     }
 
@@ -44,7 +42,6 @@ public class UserMapping {
 
         return "welcome";
     }
-
 
     @RequestMapping(value = "/perform_login", method = RequestMethod.POST)
     public String login(@ModelAttribute("user_dto") UserDTO userDTO, Model model) {

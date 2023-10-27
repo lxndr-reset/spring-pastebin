@@ -9,7 +9,6 @@ import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.cache.caffeine.CaffeineCacheManager;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.support.PropertiesLoaderUtils;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
@@ -55,6 +54,7 @@ public class AppConfig {
     public CacheManagerCustomizer<CaffeineCacheManager> caffeineCacheManagerCustomizer() {
         return caffeineCacheManager -> caffeineCacheManager.setAllowNullValues(true);
     }
+
 
     @Bean
     public DataSource dataSource() {

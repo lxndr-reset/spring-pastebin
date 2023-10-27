@@ -59,7 +59,6 @@ public class MessageMapping {
         model.addAttribute("user", authenticatedUser);
 
         return "welcome";
-
     }
 
     private void setUserMessagesInUserIfEmpty(User authenticatedUser) {

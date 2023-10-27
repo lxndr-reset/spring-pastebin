@@ -2,8 +2,8 @@ package com.pastebin.service;
 
 import com.pastebin.entity.ShortURL;
 import com.pastebin.util.ShortURLValueGenerator;
+import org.hibernate.annotations.BatchSize;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
@@ -39,7 +39,7 @@ public class ScheduledOperations {
             , initialDelay = 3
             , timeUnit = TimeUnit.DAYS)
     @Transactional
-    @CacheEvict("message")
+    @BatchSize(size = 500)
     public void finalDeleteMessages() {
         if (!isDeletingRunning) {
             isDeletingRunning = true;
