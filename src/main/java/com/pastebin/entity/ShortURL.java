@@ -3,7 +3,6 @@ package com.pastebin.entity;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.pastebin.util.ShortURLGenerationMetadata;
 import jakarta.persistence.*;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.*;
 import java.util.Objects;
@@ -39,7 +38,8 @@ public class ShortURL {
         this.urlValue = urlValue;
         this.message = message;
     }
-//todo remove getting
+
+    //todo remove getting
     public static long getLastGeneratedAmount() {
         try (BufferedReader bufferedReader = new BufferedReader(new FileReader("src/main/resources/last_generated_amount.txt"))) {
             String line = bufferedReader.readLine();
@@ -64,18 +64,7 @@ public class ShortURL {
     }
 
     public static String getLastGeneratedValue() {
-        try (BufferedReader bufferedReader = new BufferedReader(new FileReader("src/main/resources/last_sequence.txt"))) {
-            String line = bufferedReader.readLine();
-
-            if (line == null || line.isEmpty()) {
-                setLastGeneratedValue("a");
-                return "a";
-            }
-
-            return line;
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+        return ShortURLGenerationMetadata.getLastGeneratedSequence();
     }
 
     public static void setLastGeneratedValue(String lastGeneratedValue) {
@@ -86,12 +75,14 @@ public class ShortURL {
         }
 
     }
+
+    public static double getMultiplier() {
+        return MULTIPLIER;
+    }
+
     @PreRemove
     public void preRemove() {
         this.setMessage(null);
-    }
-    public static double getMultiplier() {
-        return MULTIPLIER;
     }
 
     @Override
