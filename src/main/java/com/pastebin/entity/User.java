@@ -32,9 +32,10 @@ public class User {
     private Set<Message> allUsersMessages;
 
 
-    public User(String email, String rawPassword) {
+    public User(String email, String rawPassword, Set<Message> allUsersMessages) {
         this.setPassword(rawPassword);
         this.setEmail(email);
+        this.setAllUsersMessages(allUsersMessages);
     }
 
     public User() {

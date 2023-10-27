@@ -3,6 +3,7 @@ package com.pastebin.controller;
 import com.pastebin.auth.AuthenticationStatus;
 import com.pastebin.dto.UserDTO;
 import com.pastebin.entity.User;
+import com.pastebin.service.MessageService;
 import com.pastebin.service.UserService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
+import java.util.HashSet;
 import java.util.NoSuchElementException;
 
 @Controller
@@ -22,18 +24,21 @@ public class UserMapping {
     private final UserService userService;
     private final Logger logger = LoggerFactory.getLogger(UserMapping.class);
     private final PasswordEncoder passwordEncoder;
+    private final MessageService messageService;
     private final AuthenticationStatus authenticationStatus;
 
     @Autowired
-    public UserMapping(UserService userService, PasswordEncoder passwordEncoder, AuthenticationStatus authenticationStatus) {
+    public UserMapping(UserService userService, PasswordEncoder passwordEncoder, MessageService messageService, AuthenticationStatus authenticationStatus) {
         this.userService = userService;
         this.passwordEncoder = passwordEncoder;
+        this.messageService = messageService;
         this.authenticationStatus = authenticationStatus;
     }
 
     @RequestMapping(value = "/save", method = RequestMethod.POST)
     public String save(@ModelAttribute("user_dto") UserDTO userDTO, Model model) {
-        User user = new User(userDTO.getEmail(), new String(userDTO.getPassword()));
+        String email = userDTO.getEmail();
+        User user = new User(email, new String(userDTO.getPassword()), new HashSet<>());
         userService.save(user);
         authenticateAndAddUserToModel(userDTO, model, user);
 

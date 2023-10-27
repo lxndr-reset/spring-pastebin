@@ -2,6 +2,7 @@ package com.pastebin.auth;
 
 import com.pastebin.dto.UserDTO;
 import com.pastebin.entity.User;
+import com.pastebin.service.UserService;
 import jakarta.servlet.http.HttpSession;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,10 +26,12 @@ import java.util.Collections;
 public class AuthenticationStatus {
     private final AuthenticationManager authenticationManager;
     private final Logger logger = LoggerFactory.getLogger(AuthenticationStatus.class);
+    private final UserService userService;
     private final HttpSession session;
 
     @Autowired
-    public AuthenticationStatus(AuthenticationManager authenticationManager, HttpSession session) {
+    public AuthenticationStatus(AuthenticationManager authenticationManager, UserService userService, HttpSession session) {
+        this.userService = userService;
         this.session = session;
         SecurityContextHolder.setStrategyName(SecurityContextHolder.MODE_GLOBAL);
         this.authenticationManager = authenticationManager;
@@ -37,15 +40,14 @@ public class AuthenticationStatus {
     public boolean isUserAuthenticated() {
         try {
             return getSecurityContext().getAuthentication().isAuthenticated();
-        }
-        catch (NullPointerException e){
+        } catch (NullPointerException e) {
             return false;
         }
     }
 
     public User getAuthenticatedUser() {
-        return new User(getSecurityContext().getAuthentication()
-                .getPrincipal().toString(), "[PROTECTED]");
+        return userService.findUserByEmail(getSecurityContext().getAuthentication()
+                .getPrincipal().toString());
     }
 
     private SecurityContext getSecurityContext() {
