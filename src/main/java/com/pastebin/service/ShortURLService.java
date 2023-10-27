@@ -15,6 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 
 @Service
 @Transactional
@@ -74,12 +75,11 @@ public class ShortURLService {
         Optional<ShortURL> result = shortURLRepo.getFirstShortURLByMessageIsNull();
 
         if (result.isEmpty()) {
-            try {
-                Thread.sleep(200);
-            } catch (InterruptedException e) {
-                throw new RuntimeException(e);
-            }
-            applicationContext.getBean(ScheduledOperations.class).generateLinkValueWithoutCheck();
+            CompletableFuture<Void> generateShortURLTask =
+                    CompletableFuture.runAsync(() ->
+                            applicationContext.getBean(ScheduledOperations.class).generateLinkValueWithoutCheck()
+                    );
+            generateShortURLTask.join();
             result = shortURLRepo.getFirstShortURLByMessageIsNull();
         }
 

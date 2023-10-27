@@ -12,7 +12,7 @@ import static jakarta.persistence.CascadeType.*;
 @Entity
 @Table(name = "short_url")
 public class ShortURL {
-    private static final double MULTIPLIER = 1.5;
+    private static final double MULTIPLIER = 1.2;
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -67,7 +67,7 @@ public class ShortURL {
         return ShortURLGenerationMetadata.getLastGeneratedSequence();
     }
 
-    public static void setLastGeneratedValue(String lastGeneratedValue) {
+    private static void setLastGeneratedValue(String lastGeneratedValue) {
         try (BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter("src/main/resources/last_sequence.txt"))) {
             bufferedWriter.write(lastGeneratedValue);
         } catch (IOException e) {

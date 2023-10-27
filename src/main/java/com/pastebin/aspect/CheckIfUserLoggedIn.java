@@ -1,12 +1,9 @@
 package com.pastebin.aspect;
 
 import com.pastebin.auth.AuthenticationStatus;
-import com.pastebin.exception.NotAuthenticatedException;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Before;
 import org.springframework.stereotype.Component;
-
-import java.nio.file.AccessDeniedException;
 
 @Aspect
 @Component
@@ -18,7 +15,7 @@ public class CheckIfUserLoggedIn {
     }
 
     @Before("@annotation(com.pastebin.annotation.NotLoggedIn)")
-    public void checkAuthentication() {
+    public void checkAuthenticationThrowExceptionIfTrue() {
         if (authenticationStatus.isUserAuthenticated()){
             throw new RuntimeException("User already logged in");
         }

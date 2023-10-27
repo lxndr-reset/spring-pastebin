@@ -61,7 +61,7 @@ public class ScheduledOperations {
             , initialDelay = 12
             , timeUnit = TimeUnit.HOURS)
     @Transactional
-    @Async
+//    @Async
     public void generateLinkValue() {
         try {
             if (!isEnoughLinksAvailable()) {
@@ -73,18 +73,18 @@ public class ScheduledOperations {
     }
 
 
-    @Async
+
     public void generateLinkValueWithoutCheck() {
         generateLinks();
     }
 
-    @Async
     protected void generateLinks() {
         int valuesToGenerateAmount = (int) Math.round(ShortURL.getLastGeneratedAmount() * ShortURL.getMultiplier());
         List<ShortURL> linkValues = Collections.synchronizedList(new ArrayList<>());
 
         try (ExecutorService executor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors())) {
-            List<CompletableFuture<Void>> futures = ShortURLValueGenerator.generate(ShortURL.getLastGeneratedValue(),
+            String lastGeneratedValue = ShortURL.getLastGeneratedValue();
+            List<CompletableFuture<Void>> futures = ShortURLValueGenerator.generate(lastGeneratedValue,
                             valuesToGenerateAmount)
                     .stream()
                     .map(seq -> CompletableFuture.supplyAsync(() ->
@@ -97,7 +97,6 @@ public class ScheduledOperations {
 
         System.out.println(getDateTime() + "Unique URLs were generated");
 
-        ShortURL.setLastGeneratedValue(getMaxString(linkValues));
         ShortURL.setLastGeneratedAmount(valuesToGenerateAmount);
 
         shortURLService.saveAll(linkValues);
