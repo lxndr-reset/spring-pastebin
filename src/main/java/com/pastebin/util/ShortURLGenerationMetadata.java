@@ -13,7 +13,8 @@ public class ShortURLGenerationMetadata {
         ShortURLGenerationMetadata.shortURLService = shortURLService;
     }
 
+    //When table is empty, we make our last sequence "a"
     public static String getLastGeneratedSequence() {
-        return shortURLService.getLastGeneratedSequence();
+        return shortURLService.getLastGeneratedSequence().orElse("a");
     }
 }

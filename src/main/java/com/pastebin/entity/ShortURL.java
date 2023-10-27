@@ -39,13 +39,13 @@ public class ShortURL {
         this.message = message;
     }
 
-    //todo remove getting
+    //todo replace files with database queries
     public static long getLastGeneratedAmount() {
         try (BufferedReader bufferedReader = new BufferedReader(new FileReader("src/main/resources/last_generated_amount.txt"))) {
             String line = bufferedReader.readLine();
 
             if (line == null || line.isEmpty()) {
-                setLastGeneratedValue("10");
+                setLastGeneratedAmount(10);
                 return 10;
             }
 
@@ -55,9 +55,9 @@ public class ShortURL {
         }
     }
 
-    public static void setLastGeneratedAmount(long lastGeneratedValue) {
+    public static void setLastGeneratedAmount(long lastGeneratedAmount) {
         try (BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter("src/main/resources/last_generated_amount.txt"))) {
-            bufferedWriter.write(Long.toString(lastGeneratedValue));
+            bufferedWriter.write(Long.toString(lastGeneratedAmount));
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -65,15 +65,6 @@ public class ShortURL {
 
     public static String getLastGeneratedValue() {
         return ShortURLGenerationMetadata.getLastGeneratedSequence();
-    }
-
-    private static void setLastGeneratedValue(String lastGeneratedValue) {
-        try (BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter("src/main/resources/last_sequence.txt"))) {
-            bufferedWriter.write(lastGeneratedValue);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-
     }
 
     public static double getMultiplier() {

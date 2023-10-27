@@ -97,7 +97,7 @@ public class ShortURLService {
         return byUrlValue.get();
     }
 
-    public String getLastGeneratedSequence(){
+    public Optional<String> getLastGeneratedSequence(){
         return shortURLRepo.getLastGeneratedSequence();
     }
 
