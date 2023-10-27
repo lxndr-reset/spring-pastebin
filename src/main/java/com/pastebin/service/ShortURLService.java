@@ -70,12 +70,17 @@ public class ShortURLService {
     public void updateShortURLCache(ShortURL url) {
     }
 
-    public ShortURL getAvailableShortURL() throws NoAvailableShortURLException {
+    public ShortURL getAvailableShortURL() {
         Optional<ShortURL> result = shortURLRepo.getFirstShortURLByMessageIsNull();
 
         if (result.isEmpty()) {
+            try {
+                Thread.sleep(200);
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
             applicationContext.getBean(ScheduledOperations.class).generateLinkValueWithoutCheck();
-            throw new NoAvailableShortURLException("No urls are available! Generation starts now. Please try again in few minutes");
+            result = shortURLRepo.getFirstShortURLByMessageIsNull();
         }
 
         return result.get();
@@ -90,6 +95,10 @@ public class ShortURLService {
                     "' not exists");
         }
         return byUrlValue.get();
+    }
+
+    public String getLastGeneratedSequence(){
+        return shortURLRepo.getLastGeneratedSequence();
     }
 
 }

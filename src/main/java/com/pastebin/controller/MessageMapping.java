@@ -79,7 +79,8 @@ public class MessageMapping {
     @RequestMapping("/new/{content}/{stringDeletionDate}")
     public String newMessage(Model model, @PathVariable String content,
                              @PathVariable String stringDeletionDate) throws NoAvailableShortURLException {
-        ShortURL shortURL = shortURLService.getAvailableShortURL();
+        ShortURL shortURL = null;
+            shortURL = shortURLService.getAvailableShortURL();
         Message message;
 
         message = new Message(content, shortURL, getValidTimeDate(stringDeletionDate));

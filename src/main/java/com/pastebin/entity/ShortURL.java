@@ -1,7 +1,9 @@
 package com.pastebin.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.pastebin.util.ShortURLGenerationMetadata;
 import jakarta.persistence.*;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.*;
 import java.util.Objects;
@@ -37,7 +39,7 @@ public class ShortURL {
         this.urlValue = urlValue;
         this.message = message;
     }
-
+//todo remove getting
     public static long getLastGeneratedAmount() {
         try (BufferedReader bufferedReader = new BufferedReader(new FileReader("src/main/resources/last_generated_amount.txt"))) {
             String line = bufferedReader.readLine();
