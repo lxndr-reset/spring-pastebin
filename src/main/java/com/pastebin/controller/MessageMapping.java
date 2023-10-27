@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 
+import java.util.NoSuchElementException;
 import java.util.concurrent.ExecutionException;
 
 @Controller
@@ -45,7 +46,13 @@ public class MessageMapping {
 
     @RequestMapping("/get/{value}")
     public String getMessageByValue(Model model, @PathVariable String value) throws ExecutionException, InterruptedException {
-        Message message = messageService.findByValue(value).get();
+        Message message;
+        try {
+            message = messageService.findByValue(value).get();
+        } catch (NoSuchElementException e) {
+            logger.debug("Element by value '" + value + "' not found");
+            throw e;
+        }
         model.addAttribute("message", message);
 
         return "get_message";

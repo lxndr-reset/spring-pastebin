@@ -12,6 +12,7 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.annotation.Caching;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.Timestamp;
 import java.util.List;
@@ -21,6 +22,7 @@ import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 
 @Service
+@Transactional
 public class MessageService {
     private final MessageRepo messageRepo;
     private final Logger logger = LoggerFactory.getLogger(MessageService.class);
@@ -31,7 +33,6 @@ public class MessageService {
     }
 
     @AvailableMessages
-    @Async
     @Cacheable(value = "message", key = "#value", unless = "#result == null")
     public CompletableFuture<Message> findByValue(String value) {
         Optional<Message> byShortURLUrlValue = messageRepo.findMessageByShortURLUrlValue(value);
@@ -93,7 +94,6 @@ public class MessageService {
     @AvailableMessages
     @Caching(evict = @CacheEvict(value = "message", key = "#message.shortURL.urlValue"),
             put = @CachePut(value = "message", key = "#message.shortURL.urlValue"))
-    @Async
     public void save(Message message) {
         try {
             messageRepo.save(message);

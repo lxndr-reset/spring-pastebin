@@ -3,15 +3,18 @@ package com.pastebin.controller;
 import com.pastebin.exception.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpStatus;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.security.access.AccessDeniedException;
+import org.springframework.web.servlet.ModelAndView;
 
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 
 @ControllerAdvice
@@ -26,14 +29,15 @@ public class GlobalExceptionHandler {
     @ExceptionHandler({NoSuchElementException.class, MessageDeletedException.class,
             NoAvailableShortURLException.class, UrlNotExistsException.class,
             UserBlockedException.class, IllegalArgumentException.class,
-            SecurityException.class, AccessDeniedException.class, AccessDeniedException.class
+            SecurityException.class, AccessDeniedException.class, AccessDeniedException.class, ExecutionException.class,
+            AccessDeniedException.class
     })
-    public String handleError(Model model, Exception exception) {
-        addExceptionAttributesToModel(model, exception);
+    public ModelAndView handleError(ModelAndView mav, Exception exception) {
+        addExceptionAttributesToModel((Model) mav.getModelMap(), exception);
 
-        LOGGER.error("Caught exception", exception);
-
-        return "error_page";
+        mav.setStatus(HttpStatus.INTERNAL_SERVER_ERROR);
+        mav.setViewName("error_page");
+        return mav;
     }
 
     private void addExceptionAttributesToModel(Model model, Exception exception) {
@@ -47,11 +51,12 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(Exception.class)
-    public String handleOtherExceptions(Model model, Exception exception) {
-        addExceptionAttributesToModel(model, exception);
+    public ModelAndView handleOtherExceptions(ModelAndView mav, Exception exception) {
+        addExceptionAttributesToModel((Model) mav.getModelMap(), exception);
+        mav.setViewName("error_page");
 
         LOGGER.error("Unknown error occurred", exception);
 
-        return "error_page";
+        return mav;
     }
 }
