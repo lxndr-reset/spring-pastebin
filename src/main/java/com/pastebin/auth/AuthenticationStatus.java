@@ -44,8 +44,8 @@ public class AuthenticationStatus {
     }
 
     public User getAuthenticatedUser() {
-        SecurityContext securityContext = getSecurityContext();
-        return new User(securityContext.getAuthentication().getPrincipal().toString(), "[PROTECTED]");
+        return new User(getSecurityContext().getAuthentication()
+                .getPrincipal().toString(), "[PROTECTED]");
     }
 
     private SecurityContext getSecurityContext() {

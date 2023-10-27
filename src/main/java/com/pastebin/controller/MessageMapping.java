@@ -8,7 +8,6 @@ import com.pastebin.entity.date.ValidTime;
 import com.pastebin.exception.NoAvailableShortURLException;
 import com.pastebin.service.MessageService;
 import com.pastebin.service.ShortURLService;
-import jakarta.servlet.http.HttpSession;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -56,10 +55,17 @@ public class MessageMapping {
         if (authenticatedUser.getEmail().isEmpty()) {
             return "redirect:/";
         }
+        setUserMessagesInUserIfEmpty(authenticatedUser);
         model.addAttribute("user", authenticatedUser);
 
         return "welcome";
 
+    }
+
+    private void setUserMessagesInUserIfEmpty(User authenticatedUser) {
+        if (authenticatedUser.getAllUsersMessages() == null) {
+            authenticatedUser.setAllUsersMessages(messageService.getMessagesByUser_Email(authenticatedUser.getEmail()));
+        }
     }
 
     @RequestMapping("/new/{content}/{stringDeletionDate}")

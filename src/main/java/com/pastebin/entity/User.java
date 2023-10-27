@@ -15,7 +15,6 @@ import java.util.Set;
 @Table(name = "\"user\"")
 public class User {
     private static final Logger logger = LoggerFactory.getLogger(User.class);
-    private static final PasswordEncoder encoder = new BCryptPasswordEncoder();
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
