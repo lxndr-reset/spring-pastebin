@@ -37,6 +37,7 @@ public class ShortURL {
     public ShortURL(String urlValue, Message message) {
         this.urlValue = urlValue;
         this.message = message;
+        message.setShortURL(this);
     }
 
     //todo replace files with database queries

@@ -21,10 +21,9 @@ public interface MessageRepo extends JpaRepository<Message, Long> {
 
     Optional<Message> findMessageByShortURLUrlValue(String value);
 
-    @Modifying
-    @Query("delete from Message m where m.deleted = true or m.deletionDate <= :timestamp")
-    List<Message> deleteAllByDeletedIsTrueOrDeletionDateIsGreaterThanEqual(@Param("timestamp") Timestamp timestamp);
-
     @Query("select m from Message m join fetch m.user u  where u.email = :userEmail")
     Set<Message> getMessagesByUser_Email(@Param("userEmail") String userEmail);
+
+    @Query("SELECT m from Message m where m.deleted = true or m.deletionDate <= :timestamp")
+    List<Message> findAllByDeletedIsTrueOrDeletionDateIsLessThanEqual(@Param("timestamp") Timestamp timestamp);
 }

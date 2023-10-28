@@ -1,10 +1,12 @@
 package com.pastebin.entity;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.pastebin.entity.date.ValidTime;
 import jakarta.persistence.*;
 import org.springframework.stereotype.Component;
 
 import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import java.util.Objects;
 
 import static jakarta.persistence.CascadeType.*;
@@ -47,7 +49,15 @@ public class Message {
     public Message(String value, ShortURL url, ValidTime deletionDate) {
         this.value = value;
         this.shortURL = url;
-        setDeletionDate(deletionDate);
+        url.setMessage(this);
+        this.setDeletionDate(deletionDate);
+    }
+
+    @VisibleForTesting
+    public Message(String value, Timestamp deletionDate, ShortURL shortURL) {
+        this.value = value;
+        this.deletionDate = deletionDate;
+        this.shortURL = shortURL;
     }
 
     public User getUser() {

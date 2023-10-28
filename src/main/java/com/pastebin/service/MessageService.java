@@ -123,10 +123,12 @@ public class MessageService {
 
     @Async
     public void deleteAllByDeletedIsTrueOrDeletionDateIsGreaterThanEqual() {
-        List<Message> messages = messageRepo.deleteAllByDeletedIsTrueOrDeletionDateIsGreaterThanEqual(
+        List<Message> messages = messageRepo.findAllByDeletedIsTrueOrDeletionDateIsLessThanEqual(
                 new Timestamp(System.currentTimeMillis()));
 
         messages.forEach(this::invalidateMessageCache);
+
+        messageRepo.deleteAllInBatch(messages);
     }
 
     @Cacheable(value = "messages", key = "#email")
