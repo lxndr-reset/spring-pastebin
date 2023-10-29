@@ -41,7 +41,7 @@ public class AppConfig {
 
     @Bean
     public CacheManager cacheManager() {
-        Caffeine<Object, Object> caffeine = Caffeine.newBuilder().expireAfterWrite(30, TimeUnit.MINUTES)
+        Caffeine<Object, Object> caffeine = Caffeine.newBuilder().expireAfterWrite(10, TimeUnit.MINUTES)
                 .executor(executor());
 
         CaffeineCacheManager caffeineCacheManager = new CaffeineCacheManager();
