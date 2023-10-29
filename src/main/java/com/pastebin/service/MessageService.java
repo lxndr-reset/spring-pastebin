@@ -34,16 +34,21 @@ public class MessageService {
 
     @AvailableMessages
     @Cacheable(value = "message", key = "#value", unless = "#result == null")
+    @Async
     public CompletableFuture<Message> findByShortURLValue(String value) {
-        Optional<Message> byShortURLUrlValue = messageRepo.findMessageByShortURLUrlValue(value);
+        Optional<Message> retrievedOptionalMessage = messageRepo.findMessageByShortURLUrlValue(value);
 
-        if (byShortURLUrlValue.isPresent()) {
-            Message message = byShortURLUrlValue.get();
-            if (message != null && !message.isDeleted()) {
-                return CompletableFuture.completedFuture(message);
+        String exceptionMessage = "Message on link https://localhost:8080/message/get/" + value + " not found";
+
+        if (retrievedOptionalMessage.isPresent()) {
+            Message retrievedMessage = retrievedOptionalMessage.get();
+
+            if (!retrievedMessage.isDeleted()) {
+                return CompletableFuture.completedFuture(retrievedMessage);
             }
+            exceptionMessage = "Message on link https://localhost:8080/message/get/" + value + " is deleted";
         }
-        throw new NoSuchElementException("Message on link https://localhost:8080/message/get/" + value + " is deleted");
+        throw new NoSuchElementException(exceptionMessage);
 
     }
 
