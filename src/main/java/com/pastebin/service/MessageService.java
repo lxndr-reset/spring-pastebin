@@ -1,8 +1,11 @@
 package com.pastebin.service;
 
 import com.pastebin.annotation.AvailableMessages;
+import com.pastebin.auth.AuthenticationContext;
 import com.pastebin.entity.Message;
+import com.pastebin.entity.User;
 import com.pastebin.repository.MessageRepo;
+import jakarta.persistence.EntityManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,10 +29,13 @@ import java.util.concurrent.CompletableFuture;
 public class MessageService {
     private final MessageRepo messageRepo;
     private final Logger logger = LoggerFactory.getLogger(MessageService.class);
+    private final AuthenticationContext authenticationContext;
+
 
     @Autowired
-    public MessageService(MessageRepo messageRepo) {
+    public MessageService(MessageRepo messageRepo, AuthenticationContext authenticationContext) {
         this.messageRepo = messageRepo;
+        this.authenticationContext = authenticationContext;
     }
 
     @AvailableMessages
@@ -104,7 +110,12 @@ public class MessageService {
             put = @CachePut(value = "message", key = "#message.shortURL.urlValue"))
     public void save(Message message) {
         try {
+            if (authenticationContext.isUserAuthenticated()){
+                User authenticatedUser = authenticationContext.getAuthenticatedUser();
+                message.setUser(authenticatedUser);
+            }
             messageRepo.save(message);
+
         } catch (Exception e) {
             invalidateMessageCache(message);
             throw e;

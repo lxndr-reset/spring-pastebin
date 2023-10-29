@@ -1,12 +1,13 @@
 package com.pastebin.controller;
 
-import com.pastebin.auth.AuthenticationStatus;
+import com.pastebin.auth.AuthenticationContext;
 import com.pastebin.entity.Message;
 import com.pastebin.entity.ShortURL;
 import com.pastebin.entity.User;
 import com.pastebin.entity.date.ValidTime;
 import com.pastebin.service.MessageService;
 import com.pastebin.service.ShortURLService;
+import jakarta.persistence.EntityManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,14 +27,15 @@ import java.util.concurrent.ExecutionException;
 public class MessageMapping {
     private final MessageService messageService;
     private final ShortURLService shortURLService;
-    private final AuthenticationStatus authenticationStatus;
+    private final AuthenticationContext authenticationContext;
     private final Logger logger = LoggerFactory.getLogger(MessageMapping.class);
 
     @Autowired
-    public MessageMapping(MessageService messageService, ShortURLService shortURLService, AuthenticationStatus authenticationStatus) {
+    public MessageMapping(MessageService messageService, ShortURLService shortURLService,
+                          AuthenticationContext authenticationContext) {
         this.messageService = messageService;
         this.shortURLService = shortURLService;
-        this.authenticationStatus = authenticationStatus;
+        this.authenticationContext = authenticationContext;
     }
 
     private static ValidTime getValidTimeDate(String stringDeletionDate) {
@@ -61,7 +63,7 @@ public class MessageMapping {
 
     @RequestMapping("/get/all")
     public String getAllUsersMessages(Model model, @ModelAttribute("user") User user, @ModelAttribute("email") String enteredEmail) {
-        User authenticatedUser = authenticationStatus.getAuthenticatedUser();
+        User authenticatedUser = authenticationContext.getAuthenticatedUser();
 
         if (authenticatedUser.getEmail().isEmpty()) {
             return "redirect:/";
@@ -79,17 +81,13 @@ public class MessageMapping {
         }
     }
 
-    //todo get user from context and set as owner if authorized
     @RequestMapping("/new/{content}/{stringDeletionDate}")
     public ModelAndView newMessage(ModelAndView modelAndView, @PathVariable String content,
                                    @PathVariable String stringDeletionDate) {
-        ShortURL shortURL;
-        shortURL = shortURLService.getAvailableShortURL();
+        Message message = new Message(content, shortURLService.getAvailableShortURL(),
+                getValidTimeDate(stringDeletionDate)
+        );
 
-        Message message;
-        message = new Message(content, shortURL, getValidTimeDate(stringDeletionDate));
-
-        shortURL.setMessage(message);
         messageService.save(message);
 
         modelAndView.getModelMap().addAttribute("message", message);
