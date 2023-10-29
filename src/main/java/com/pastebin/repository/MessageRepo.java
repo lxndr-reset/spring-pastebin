@@ -14,9 +14,6 @@ import java.util.Set;
 
 @Repository
 public interface MessageRepo extends JpaRepository<Message, Long> {
-    @Modifying
-    List<Message> deleteAllByDeletedIsTrue();
-
     long countByDeletedIsFalse();
 
     Optional<Message> findMessageByShortURLUrlValue(String value);

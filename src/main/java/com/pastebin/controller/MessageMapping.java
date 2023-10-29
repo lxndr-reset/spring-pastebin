@@ -49,7 +49,7 @@ public class MessageMapping {
     public String getMessageByValue(Model model, @PathVariable String value) throws ExecutionException, InterruptedException {
         Message message;
         try {
-            message = messageService.findByValue(value).get();
+            message = messageService.findByShortURLValue(value).get();
         } catch (NoSuchElementException e) {
             logger.debug("Element by value '" + value + "' not found");
             throw e;
@@ -103,7 +103,7 @@ public class MessageMapping {
     public String editMessageContent(Model model, @PathVariable String value, @PathVariable String content)
             throws ExecutionException, InterruptedException {
 
-        Message message = messageService.findByValue(value).get();
+        Message message = messageService.findByShortURLValue(value).get();
         message.setValue(content);
         messageService.save(message);
 
@@ -117,7 +117,7 @@ public class MessageMapping {
                                                     @PathVariable String content, @PathVariable String deletionDate)
             throws ExecutionException, InterruptedException {
 
-        Message message = messageService.findByValue(value).get();
+        Message message = messageService.findByShortURLValue(value).get();
         message.setValue(content);
         message.setDeletionDate(getValidTimeDate(deletionDate));
 
@@ -132,7 +132,7 @@ public class MessageMapping {
     public String editMessageDeletionDate(Model model, @PathVariable String value,
                                           @PathVariable String deletionDate) throws ExecutionException, InterruptedException {
 
-        Message message = messageService.findByValue(value).get();
+        Message message = messageService.findByShortURLValue(value).get();
         message.setDeletionDate(getValidTimeDate(deletionDate));
         messageService.save(message);
 

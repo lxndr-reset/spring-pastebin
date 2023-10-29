@@ -34,7 +34,7 @@ public class MessageService {
 
     @AvailableMessages
     @Cacheable(value = "message", key = "#value", unless = "#result == null")
-    public CompletableFuture<Message> findByValue(String value) {
+    public CompletableFuture<Message> findByShortURLValue(String value) {
         Optional<Message> byShortURLUrlValue = messageRepo.findMessageByShortURLUrlValue(value);
 
         if (byShortURLUrlValue.isPresent()) {
@@ -43,7 +43,8 @@ public class MessageService {
                 return CompletableFuture.completedFuture(message);
             }
         }
-        throw new NoSuchElementException("Message on link https://localhost:8080/message/get/" + value + " does not exists");
+        throw new NoSuchElementException("Message on link https://localhost:8080/message/get/" + value + " is deleted");
+
     }
 
     @AvailableMessages
@@ -65,9 +66,11 @@ public class MessageService {
 
         Message message = softDeletedMessageIfExists(byShortURLUrlValue);
         if (message != null) return CompletableFuture.completedFuture(message);
-
-        throw new NoSuchElementException("Message on link https://localhost:8080/message/get/" + value + " does not exists");
+        else {
+            throw new NoSuchElementException("Message on link https://localhost:8080/message/get/" + value + " does not exists");
+        }
     }
+
 
     private Message softDeletedMessageIfExists(Optional<Message> byShortURLUrlValue) {
         if (byShortURLUrlValue.isPresent()) {
@@ -107,10 +110,6 @@ public class MessageService {
     @Async
     public void deleteById(Long id) {
         messageRepo.deleteById(id);
-    }
-
-    public void deleteAllMessagesByDeleted() {
-        messageRepo.deleteAllByDeletedIsTrue().forEach(this::invalidateMessageCache);
     }
 
     @CacheEvict(value = "message", key = "#message.shortURL.urlValue")
