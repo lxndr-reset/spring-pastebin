@@ -14,8 +14,8 @@ import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
 import java.util.NoSuchElementException;
-import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
+import java.util.concurrent.ExecutionException;
 
 @ControllerAdvice
 public class GlobalExceptionHandler {
@@ -29,12 +29,12 @@ public class GlobalExceptionHandler {
     @ExceptionHandler({NoSuchElementException.class, MessageDeletedException.class,
             NoAvailableShortURLException.class, UrlNotExistsException.class,
             UserBlockedException.class, IllegalArgumentException.class,
-            SecurityException.class, AccessDeniedException.class, AccessDeniedException.class, ExecutionException.class,
-            AccessDeniedException.class
+            SecurityException.class, AccessDeniedException.class, ExecutionException.class
     })
-    public ModelAndView handleError(ModelAndView mav, Exception exception) {
-        addExceptionAttributesToModel((Model) mav.getModelMap(), exception);
+    public ModelAndView handleError(Model model, Exception exception) {
+        addExceptionAttributesToModel(model, exception);
 
+        ModelAndView mav = new ModelAndView();
         mav.setStatus(HttpStatus.INTERNAL_SERVER_ERROR);
         mav.setViewName("error_page");
         return mav;
@@ -51,8 +51,10 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(Exception.class)
-    public ModelAndView handleOtherExceptions(ModelAndView mav, Exception exception) {
-        addExceptionAttributesToModel((Model) mav.getModelMap(), exception);
+    public ModelAndView handleOtherExceptions(Model model, Exception exception) {
+        addExceptionAttributesToModel(model, exception);
+
+        ModelAndView mav = new ModelAndView();
         mav.setViewName("error_page");
 
         LOGGER.error("Unknown error occurred", exception);

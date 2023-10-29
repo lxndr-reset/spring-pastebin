@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.NoSuchElementException;
 
 @Service
 public class UserDetailsService implements org.springframework.security.core.userdetails.UserDetailsService {
@@ -21,7 +22,9 @@ public class UserDetailsService implements org.springframework.security.core.use
 
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
-        User user = userService.findUserByEmail(email);
-        return new org.springframework.security.core.userdetails.User(email, user.getPassword(), List.of(new SimpleGrantedAuthority("ROLE_USER")));
+        User user = userService.findUserByEmail(email).orElseThrow(() -> new NoSuchElementException("User not found"));
+        return new org.springframework.security.core.userdetails.User(email, user.getPassword(), List.of(
+                new SimpleGrantedAuthority("ROLE_USER"))
+        );
     }
 }
