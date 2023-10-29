@@ -1,6 +1,6 @@
 package com.pastebin.exception;
 
-public class MessageDeletedException extends RuntimeException {
+public class MessageDeletedException extends Exception {
     public MessageDeletedException() {
     }
 

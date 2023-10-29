@@ -7,6 +7,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+import java.util.HashSet;
 import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.Set;
@@ -29,13 +30,12 @@ public class User {
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JsonIgnore
-    private Set<Message> allUsersMessages;
+    private Set<Message> allUsersMessages = new HashSet<>();
 
 
-    public User(String email, String rawPassword, Set<Message> allUsersMessages) {
+    public User(String email, String rawPassword) {
         this.setPassword(rawPassword);
         this.setEmail(email);
-        this.setAllUsersMessages(allUsersMessages);
     }
 
     public User() {

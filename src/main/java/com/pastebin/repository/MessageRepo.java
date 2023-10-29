@@ -21,7 +21,7 @@ public interface MessageRepo extends JpaRepository<Message, Long> {
 
     Optional<Message> findMessageByShortURLUrlValue(String value);
 
-    @Query("select m from Message m join fetch m.user u  where u.email = :userEmail")
+    @Query("select m from Message m join fetch m.user u where m.deleted = false and u.email = :userEmail")
     Set<Message> getMessagesByUser_Email(@Param("userEmail") String userEmail);
 
     @Query("SELECT m from Message m where m.deleted = true or m.deletionDate <= :timestamp")

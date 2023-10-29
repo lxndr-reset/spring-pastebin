@@ -36,7 +36,7 @@ public class UserMapping {
     @RequestMapping(value = "/save", method = RequestMethod.POST)
     public String save(@ModelAttribute("user_dto") UserDTO userDTO, Model model) {
         String email = userDTO.getEmail();
-        User user = new User(email, new String(userDTO.getPassword()), new HashSet<>());
+        User user = new User(email, new String(userDTO.getPassword()));
         userService.save(user);
         authenticateAndAddUserToModel(userDTO, model, user);
 

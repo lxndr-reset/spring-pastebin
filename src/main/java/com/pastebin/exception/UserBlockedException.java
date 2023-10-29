@@ -1,6 +1,6 @@
 package com.pastebin.exception;
 
-public class UserBlockedException extends RuntimeException {
+public class UserBlockedException extends Exception {
     public UserBlockedException() {
     }
 
