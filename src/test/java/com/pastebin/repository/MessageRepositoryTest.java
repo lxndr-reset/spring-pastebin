@@ -2,6 +2,7 @@ package com.pastebin.repository;
 
 import com.pastebin.entity.Message;
 import com.pastebin.entity.ShortURL;
+import com.pastebin.entity.User;
 import com.pastebin.entity.date.ValidTime;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -16,8 +17,10 @@ import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @DataJpaTest
 class MessageRepositoryTest {
@@ -40,6 +43,30 @@ class MessageRepositoryTest {
         Assertions.assertEquals(messageByShortURLUrlValue.get(), message);
     }
 
+    @Test
+    void getMessagesByUserEmailTest(){
+        //given
+        User user = new User("test@test.test", "[protected]");
+
+        Message msg1 = new Message("Test1", new ShortURL("a"), ValidTime.THREE_MONTHS);
+        msg1.setDeleted(true);
+        msg1.setUser(user);
+
+        Message msg2 = new Message("Test2", new ShortURL("b"), ValidTime.THREE_MONTHS);
+        msg2.setUser(user);
+
+        Message msg3 = new Message("Test3", new ShortURL("c"), ValidTime.THREE_MONTHS);
+        List<Message> messages = List.of(msg1, msg2, msg3);
+
+
+        messageRepo.saveAllAndFlush(messages);
+
+        //when
+        Set<Message> messagesByUserEmail = messageRepo.getMessagesByUser_Email(user.getEmail());
+        //then
+
+        assertEquals(Set.of(msg2), messagesByUserEmail);
+    }
     @Test
     void testDeleteByDeletedIsTrueOrExpired() {
         Message message1 = new Message("test1", Timestamp.from(Instant.now()), new ShortURL("a"));
