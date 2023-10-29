@@ -6,7 +6,6 @@ import jakarta.persistence.*;
 import org.springframework.stereotype.Component;
 
 import java.sql.Timestamp;
-import java.time.LocalDateTime;
 import java.util.Objects;
 
 import static jakarta.persistence.CascadeType.*;
@@ -35,7 +34,7 @@ public class Message {
     private ShortURL shortURL;
 
     @JoinColumn(name = "owner_id")
-    @ManyToOne(fetch = FetchType.LAZY, cascade = ALL)
+    @ManyToOne(fetch = FetchType.LAZY, cascade = {DETACH, MERGE, PERSIST, REFRESH})
     private User user;
 
     public Message() {
@@ -58,6 +57,7 @@ public class Message {
         this.value = value;
         this.deletionDate = deletionDate;
         this.shortURL = shortURL;
+        shortURL.setMessage(this);
     }
 
     public User getUser() {
@@ -66,6 +66,8 @@ public class Message {
 
     public void setUser(User user) {
         this.user = user;
+
+        user.getAllUsersMessages().add(this);
     }
 
     @Override
