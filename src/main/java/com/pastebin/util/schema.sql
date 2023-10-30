@@ -8,6 +8,19 @@ create table "user"
             unique,
     pass_bcrypt varchar(72) not null
 );
+
+create table message
+(
+    message_id    bigserial
+        constraint message_pk
+            primary key,
+    message_value text                  not null,
+    is_deleted    boolean default false not null,
+    owner_id      integer
+        constraint message_user_user_id_fk
+            references "user",
+    delete_date   timestamp             not null
+);
 create table short_url
 (
     url_id             bigserial
@@ -22,18 +35,6 @@ create table short_url
         constraint short_urls___fk
             references message
             on delete set null
-);
-create table message
-(
-    message_id    bigserial
-        constraint message_pk
-            primary key,
-    message_value text                  not null,
-    is_deleted    boolean default false not null,
-    owner_id      integer
-        constraint message_user_user_id_fk
-            references "user",
-    delete_date   timestamp             not null
 );
 
 create index message_message_id_index
