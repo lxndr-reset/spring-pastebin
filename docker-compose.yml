@@ -1,0 +1,22 @@
+version: '3.3'
+services:
+  db:
+    image: postgres:latest
+    environment:
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: pastebin
+    ports:
+      - "5432:5432"
+    volumes:
+      - db_data:/var/lib/postgresql/data
+      - ./src/main/java/com/pastebin/util/schema.sql:/docker-entrypoint-initdb.d/schema.sql:ro
+  app:
+    build: .
+    ports:
+      - "8080:8080"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/docker_pastebin
+    depends_on:
+      - db
+volumes:
+  db_data: {}
