@@ -13,7 +13,7 @@ FROM base as build
 RUN ./mvnw package -DskipTests
 
 FROM eclipse-temurin:21-jdk-jammy as production
-ENV SPRING_PROFILES_ACTIVE=docker
 EXPOSE 8080
 COPY --from=build /app/target/Pastebin-*.jar /pastebin.jar
+ENV SPRING_PROFILES_ACTIVE=docker
 CMD ["java", "-Djava.security.egd=file:/dev/./urandom", "-jar", "pastebin.jar"]

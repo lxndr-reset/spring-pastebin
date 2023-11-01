@@ -5,7 +5,6 @@ services:
     environment:
       POSTGRES_PASSWORD: postgres
       POSTGRES_DB: pastebin
-        - SPRING_PROFILES_ACTIVE=docker
     ports:
       - "5432:5432"
     volumes:
