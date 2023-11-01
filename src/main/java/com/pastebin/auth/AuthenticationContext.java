@@ -2,7 +2,7 @@ package com.pastebin.auth;
 
 import com.pastebin.dto.UserDTO;
 import com.pastebin.entity.User;
-import com.pastebin.service.UserService;
+import com.pastebin.service.entityService.UserService;
 import jakarta.servlet.http.HttpSession;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

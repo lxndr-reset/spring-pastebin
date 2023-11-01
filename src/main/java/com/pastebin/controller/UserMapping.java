@@ -3,7 +3,7 @@ package com.pastebin.controller;
 import com.pastebin.auth.AuthenticationContext;
 import com.pastebin.dto.UserDTO;
 import com.pastebin.entity.User;
-import com.pastebin.service.UserService;
+import com.pastebin.service.entityService.UserService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;

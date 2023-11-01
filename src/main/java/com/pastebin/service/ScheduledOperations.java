@@ -1,10 +1,11 @@
 package com.pastebin.service;
 
 import com.pastebin.entity.ShortURL;
+import com.pastebin.service.entityService.MessageService;
+import com.pastebin.service.entityService.ShortURLService;
 import com.pastebin.util.ShortURLValueGenerator;
 import org.hibernate.annotations.BatchSize;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -96,8 +97,6 @@ public class ScheduledOperations {
         }
 
         System.out.println(getDateTime() + "Unique URLs were generated");
-
-        ShortURL.setLastGeneratedAmount(valuesToGenerateAmount);
 
         shortURLService.saveAll(linkValues);
     }

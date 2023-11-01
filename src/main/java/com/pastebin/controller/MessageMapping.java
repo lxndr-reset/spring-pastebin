@@ -2,12 +2,10 @@ package com.pastebin.controller;
 
 import com.pastebin.auth.AuthenticationContext;
 import com.pastebin.entity.Message;
-import com.pastebin.entity.ShortURL;
 import com.pastebin.entity.User;
 import com.pastebin.entity.date.ValidTime;
-import com.pastebin.service.MessageService;
-import com.pastebin.service.ShortURLService;
-import jakarta.persistence.EntityManager;
+import com.pastebin.service.entityService.MessageService;
+import com.pastebin.service.entityService.ShortURLService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
