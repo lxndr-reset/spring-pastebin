@@ -1,6 +1,6 @@
 package com.pastebin.util;
 
-import com.pastebin.service.ShortURLService;
+import com.pastebin.service.entityService.ShortURLService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -16,5 +16,9 @@ public class ShortURLGenerationMetadata {
     //When table is empty, we make our last sequence "a"
     public static String getLastGeneratedSequence() {
         return shortURLService.getLastGeneratedSequence().orElse("a");
+    }
+
+    public static long getGenerationValue() {
+        return (long) Math.max(shortURLService.count() * 0.85, 10);
     }
 }

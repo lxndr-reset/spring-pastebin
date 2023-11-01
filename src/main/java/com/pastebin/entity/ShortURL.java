@@ -4,7 +4,6 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.pastebin.util.ShortURLGenerationMetadata;
 import jakarta.persistence.*;
 
-import java.io.*;
 import java.util.Objects;
 
 import static jakarta.persistence.CascadeType.*;
@@ -40,28 +39,8 @@ public class ShortURL {
         message.setShortURL(this);
     }
 
-    //todo replace files with database queries
     public static long getLastGeneratedAmount() {
-        try (BufferedReader bufferedReader = new BufferedReader(new FileReader("src/main/resources/last_generated_amount.txt"))) {
-            String line = bufferedReader.readLine();
-
-            if (line == null || line.isEmpty()) {
-                setLastGeneratedAmount(10);
-                return 10;
-            }
-
-            return Long.parseLong(line);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    public static void setLastGeneratedAmount(long lastGeneratedAmount) {
-        try (BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter("src/main/resources/last_generated_amount.txt"))) {
-            bufferedWriter.write(Long.toString(lastGeneratedAmount));
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+        return ShortURLGenerationMetadata.getGenerationValue();
     }
 
     public static String getLastGeneratedValue() {
