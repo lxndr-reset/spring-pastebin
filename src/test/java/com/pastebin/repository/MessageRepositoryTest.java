@@ -45,7 +45,6 @@ class MessageRepositoryTest {
 
     @Test
     void getMessagesByUserEmailTest(){
-        //given
         User user = new User("test@test.test", "[protected]");
 
         Message msg1 = new Message("Test1", new ShortURL("a"), ValidTime.THREE_MONTHS);
@@ -58,12 +57,8 @@ class MessageRepositoryTest {
         Message msg3 = new Message("Test3", new ShortURL("c"), ValidTime.THREE_MONTHS);
         List<Message> messages = List.of(msg1, msg2, msg3);
 
-
         messageRepo.saveAllAndFlush(messages);
-
-        //when
         Set<Message> messagesByUserEmail = messageRepo.getMessagesByUser_Email(user.getEmail());
-        //then
 
         assertEquals(Set.of(msg2), messagesByUserEmail);
     }
