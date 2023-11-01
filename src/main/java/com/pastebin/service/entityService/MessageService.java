@@ -1,4 +1,4 @@
-package com.pastebin.service;
+package com.pastebin.service.entityService;
 
 import com.pastebin.annotation.AvailableMessages;
 import com.pastebin.auth.AuthenticationContext;
@@ -63,6 +63,7 @@ public class MessageService {
     @AvailableMessages
     @Cacheable(value = "message", key = "#id")
     @Async
+    @CacheEvict(value = "messages", key = "#id")
     public CompletableFuture<Message> findById(Long id) {
         Optional<Message> message = messageRepo.findById(id);
         if (message.isEmpty() || message.get().isDeleted() || System.currentTimeMillis() >
@@ -72,7 +73,7 @@ public class MessageService {
         return CompletableFuture.completedFuture(message.get());
     }
 
-    @CacheEvict(value = "message", key = "#value")
+    @CacheEvict(value = {"message","messages"}, key = "#value")
     @Async
     public CompletableFuture<Message> softDeleteByValue(String value) {
         Optional<Message> byShortURLUrlValue = messageRepo.findMessageByShortURLUrlValue(value);
@@ -110,6 +111,7 @@ public class MessageService {
     @AvailableMessages
     @Caching(evict = @CacheEvict(value = "message", key = "#message.shortURL.urlValue"),
             put = @CachePut(value = "message", key = "#message.shortURL.urlValue"))
+    @CacheEvict(value = "messages", key = "#message.shortURL.urlValue")
     public void save(Message message) {
         try {
             if (authenticationContext.isUserAuthenticated()){

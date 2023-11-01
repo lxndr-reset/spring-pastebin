@@ -1,9 +1,10 @@
-package com.pastebin.service;
+package com.pastebin.service.entityService;
 
 import com.pastebin.entity.ShortURL;
 import com.pastebin.exception.NoAvailableShortURLException;
 import com.pastebin.exception.UrlNotExistsException;
 import com.pastebin.repository.ShortURLRepo;
+import com.pastebin.service.ScheduledOperations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.CachePut;

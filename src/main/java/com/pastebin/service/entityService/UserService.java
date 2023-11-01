@@ -1,4 +1,4 @@
-package com.pastebin.service;
+package com.pastebin.service.entityService;
 
 import com.pastebin.entity.User;
 import com.pastebin.repository.UserRepo;
