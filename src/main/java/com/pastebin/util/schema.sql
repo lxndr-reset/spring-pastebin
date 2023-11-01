@@ -1,4 +1,4 @@
-create table "user"
+create table if not exists "user"
 (
     user_id     serial
         constraint user_pk
@@ -9,7 +9,7 @@ create table "user"
     pass_bcrypt varchar(72) not null
 );
 
-create table message
+create table if not exists message
 (
     message_id    bigserial
         constraint message_pk
@@ -21,7 +21,7 @@ create table message
             references "user",
     delete_date   timestamp             not null
 );
-create table short_url
+create table if not exists short_url
 (
     url_id             bigserial
         constraint short_urls_pk

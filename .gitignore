@@ -31,4 +31,7 @@ build/
 
 ### VS Code ###
 .vscode/
+
+### Custom ###
 src/main/java/com/pastebin/LoadTest.java
+data
