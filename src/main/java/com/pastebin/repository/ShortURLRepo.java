@@ -16,6 +16,6 @@ public interface ShortURLRepo extends JpaRepository<ShortURL, Long> {
     Optional<ShortURL> findByUrlValue(String value);
 
     void deleteShortURLByUrlValue(String value);
-    @Query("SELECT MAX(s.urlValue) FROM ShortURL s")
+    @Query(value = "SELECT max(s.urlValue) FROM ShortURL s WHERE LENGTH(s.urlValue) = (SELECT MAX(LENGTH(s2.urlValue)) FROM ShortURL s2)")
     Optional<String> getLastGeneratedSequence();
 }

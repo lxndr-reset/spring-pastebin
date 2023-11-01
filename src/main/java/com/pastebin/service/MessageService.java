@@ -30,12 +30,14 @@ public class MessageService {
     private final MessageRepo messageRepo;
     private final Logger logger = LoggerFactory.getLogger(MessageService.class);
     private final AuthenticationContext authenticationContext;
-
+    private final EntityManager entityManager;
 
     @Autowired
-    public MessageService(MessageRepo messageRepo, AuthenticationContext authenticationContext) {
+    public MessageService(MessageRepo messageRepo, AuthenticationContext authenticationContext,
+                          EntityManager entityManager) {
         this.messageRepo = messageRepo;
         this.authenticationContext = authenticationContext;
+        this.entityManager = entityManager;
     }
 
     @AvailableMessages
@@ -112,6 +114,8 @@ public class MessageService {
         try {
             if (authenticationContext.isUserAuthenticated()){
                 User authenticatedUser = authenticationContext.getAuthenticatedUser();
+                authenticatedUser = entityManager.merge(authenticatedUser);
+
                 message.setUser(authenticatedUser);
             }
             messageRepo.save(message);
