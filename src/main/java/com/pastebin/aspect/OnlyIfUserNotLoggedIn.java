@@ -17,8 +17,8 @@ public class OnlyIfUserNotLoggedIn {
     }
 
     @Before("@annotation(com.pastebin.annotation.NotLoggedIn)")
-    public void checkAuthenticationThrowExceptionIfTrue() {
+    public void checkAuthenticationThrowExceptionIfTrue() throws Exception {
         if (authenticationContext.isUserAuthenticated()){
-            throw new RuntimeException("User already logged in");
+            throw new Exception("User already logged in");
         }
     }}
