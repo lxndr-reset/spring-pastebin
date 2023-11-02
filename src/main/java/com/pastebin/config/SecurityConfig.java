@@ -90,7 +90,6 @@ public class SecurityConfig {
                 .authenticationManager(authenticationConfiguration.getAuthenticationManager())
                 .logout(logout -> {
                     logout.deleteCookies("JSESSIONID", "remove");
-                    logout.logoutRequestMatcher(mvc().pattern("/logout"));
                     logout.logoutUrl("/logout").clearAuthentication(true);
                     logout.invalidateHttpSession(true);
                     logout.logoutSuccessUrl("/");

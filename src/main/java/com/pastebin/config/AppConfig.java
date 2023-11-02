@@ -3,7 +3,6 @@ package com.pastebin.config;
 
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.zaxxer.hikari.HikariDataSource;
-import org.hibernate.property.access.spi.PropertyAccessBuildingException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.cache.CacheManagerCustomizer;
 import org.springframework.cache.CacheManager;
@@ -11,11 +10,9 @@ import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.cache.caffeine.CaffeineCacheManager;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Profile;
 import org.springframework.core.env.Environment;
 import org.springframework.core.io.support.PropertiesLoaderUtils;
 import org.springframework.scheduling.annotation.EnableAsync;
-import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 
 import javax.sql.DataSource;
@@ -26,10 +23,8 @@ import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Properties;
-import java.util.Set;
 import java.util.concurrent.Executor;
 import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
 
 @Configuration
 @EnableWebMvc
@@ -38,30 +33,23 @@ import java.util.stream.Collectors;
 public class AppConfig {
 
     private final Environment environment;
+    private final Executor executor;
 
     @Autowired
-    public AppConfig(Environment environment) {
+    public AppConfig(Environment environment, Executor executor) {
         this.environment = environment;
-    }
-
-    @Bean
-    public Executor executor() {
-        ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
-        executor.setCorePoolSize(2);
-        executor.setMaxPoolSize(Runtime.getRuntime().availableProcessors());
-        executor.setThreadNamePrefix("CustomAsyncExecutor-");
-        executor.initialize();
-
-        return executor;
+        this.executor = executor;
     }
 
     @Bean
     public CacheManager cacheManager() {
-        Caffeine<Object, Object> caffeine = Caffeine.newBuilder().expireAfterWrite(10, TimeUnit.MINUTES)
-                .executor(executor());
+        Caffeine<Object, Object> caffeine = Caffeine.newBuilder()
+                .expireAfterWrite(10, TimeUnit.MINUTES)
+                .executor(this.executor);
 
         CaffeineCacheManager caffeineCacheManager = new CaffeineCacheManager();
         caffeineCacheManager.setCaffeine(caffeine);
+
 
         return caffeineCacheManager;
     }
@@ -114,10 +102,10 @@ public class AppConfig {
         return dataSource;
     }
 
-    private boolean containsProperty(String ... propertyNames) {
+    private boolean containsProperty(String... propertyNames) {
         HashSet<String> profiles = new HashSet<>(Arrays.asList(environment.getActiveProfiles()));
         for (String name : propertyNames) {
-            if (profiles.contains(name)){
+            if (profiles.contains(name)) {
                 return true;
             }
         }

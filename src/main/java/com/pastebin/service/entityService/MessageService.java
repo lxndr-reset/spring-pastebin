@@ -40,8 +40,8 @@ public class MessageService {
         this.entityManager = entityManager;
     }
 
-    @AvailableMessages
-    @Cacheable(value = "message", key = "#value", unless = "#result == null")
+//    @AvailableMessages
+    @Cacheable(value = "message")
     @Async
     public CompletableFuture<Message> findByShortURLValue(String value) {
         Optional<Message> retrievedOptionalMessage = messageRepo.findMessageByShortURLUrlValue(value);
@@ -61,8 +61,8 @@ public class MessageService {
     }
 
     @AvailableMessages
-    @Cacheable(value = "message", key = "#id")
     @Async
+    @Cacheable(value = "message", key = "#id")
     @CacheEvict(value = "messages", key = "#id")
     public CompletableFuture<Message> findById(Long id) {
         Optional<Message> message = messageRepo.findById(id);
@@ -89,7 +89,7 @@ public class MessageService {
     private Message softDeletedMessageIfExists(Optional<Message> byShortURLUrlValue) {
         if (byShortURLUrlValue.isPresent()) {
             Message message = byShortURLUrlValue.get();
-            if (message != null && !message.isDeleted()) {
+            if (!message.isDeleted()) {
                 message.setDeleted(true);
                 messageRepo.save(message);
                 return message;

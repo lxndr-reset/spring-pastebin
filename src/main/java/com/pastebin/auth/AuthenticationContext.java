@@ -38,16 +38,20 @@ public class AuthenticationContext {
     public AuthenticationContext(AuthenticationManager authenticationManager, UserService userService, HttpSession session) {
         this.userService = userService;
         this.session = session;
-        SecurityContextHolder.setStrategyName(SecurityContextHolder.MODE_GLOBAL);
         this.authenticationManager = authenticationManager;
     }
 
-    private Authentication getAuthentication() {
-        SecurityContext context = getSecurityContext();
-        return context != null ? context.getAuthentication() : null;
+    synchronized private Authentication getAuthentication() {
+        SecurityContext context;
+        try {
+            context = this.getSecurityContext();
+            return context.getAuthentication();
+        } catch (NullPointerException e) {
+            return null;
+        }
     }
 
-    public boolean isUserAuthenticated() {
+    synchronized public boolean isUserAuthenticated() {
         try {
             return getSecurityContext().getAuthentication().isAuthenticated(); //context also may be null on app start
         } catch (NullPointerException e) {
@@ -61,7 +65,7 @@ public class AuthenticationContext {
      * @param userDTO the user data transfer object containing the email and password
      * @param <T>     the type of userDTO
      */
-    public <T extends UserDTO> void setUserAuthenticated(T userDTO) {
+    synchronized public <T extends UserDTO> void setUserAuthenticated(T userDTO) {
 
         UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken =
                 new UsernamePasswordAuthenticationToken(userDTO.getEmail(),
@@ -71,23 +75,36 @@ public class AuthenticationContext {
         authenticationManager.authenticate(usernamePasswordAuthenticationToken);
 
         if (usernamePasswordAuthenticationToken.isAuthenticated()) {
-            SecurityContextHolder.getContext().setAuthentication(usernamePasswordAuthenticationToken);
-            session.setAttribute(HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY, SecurityContextHolder.getContext());
+            SecurityContext context = SecurityContextHolder.getContext();
+
+            context.setAuthentication(usernamePasswordAuthenticationToken);
+            session.setAttribute(HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY, context);
 
         } else {
             throw new AuthenticationServiceException("Something wrong during your authentication process. Please try again!");
         }
     }
 
-    public User getAuthenticatedUser() {
+    synchronized public User getAuthenticatedUser() {
         if (this.authenticatedUser == null && getAuthentication() != null) {
             this.authenticatedUser = userService.findUserByEmail(getAuthentication().getPrincipal().toString()).get();
         }
         return this.authenticatedUser;
     }
 
-    private SecurityContext getSecurityContext() {
-        return (SecurityContext) session.getAttribute(HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY);
+    synchronized private SecurityContext getSecurityContext() {
+        Object securityContext;
+        securityContext = session.getAttribute(
+                HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY
+        );
+
+        if (securityContext instanceof SecurityContext) {
+            return (SecurityContext) securityContext;
+        }
+
+        throw new ClassCastException("getSecurityContext should get SecurityContext, but got " +
+                securityContext.getClass()
+        );
     }
 
     public void removeAuthentication() {

@@ -29,8 +29,7 @@ public class MessageMapping {
     private final Logger logger = LoggerFactory.getLogger(MessageMapping.class);
 
     @Autowired
-    public MessageMapping(MessageService messageService, ShortURLService shortURLService,
-                          AuthenticationContext authenticationContext) {
+    public MessageMapping(MessageService messageService, ShortURLService shortURLService, AuthenticationContext authenticationContext) {
         this.messageService = messageService;
         this.shortURLService = shortURLService;
         this.authenticationContext = authenticationContext;
@@ -40,23 +39,23 @@ public class MessageMapping {
         try {
             return ValidTime.valueOf(stringDeletionDate);
         } catch (IllegalArgumentException e) {
-            throw new IllegalArgumentException("Wrong or missing option " + stringDeletionDate + ".\n Available options: " +
-                    "ONE_HOUR, ONE_DAY, ONE_WEEK, TWO_WEEKS, ONE_MONTH, THREE_MONTHS");
+            throw new IllegalArgumentException("Wrong or missing option " + stringDeletionDate + ".\n Available options: " + "ONE_HOUR, ONE_DAY, ONE_WEEK, TWO_WEEKS, ONE_MONTH, THREE_MONTHS");
         }
     }
 
     @RequestMapping("/get/{value}")
-    public String getMessageByValue(Model model, @PathVariable String value) throws ExecutionException, InterruptedException {
+    public ModelAndView getMessageByValue(ModelAndView mav, @PathVariable String value) {
         Message message;
         try {
-            message = messageService.findByShortURLValue(value).get();
+            message = messageService.findByShortURLValue(value).join();
         } catch (NoSuchElementException e) {
             logger.debug("Element by value '" + value + "' not found");
             throw e;
         }
-        model.addAttribute("message", message);
+        mav.getModelMap().addAttribute("message", message);
+        mav.setViewName("get_message");
 
-        return "get_message";
+        return mav;
     }
 
     @RequestMapping("/get/all")
@@ -80,11 +79,8 @@ public class MessageMapping {
     }
 
     @RequestMapping("/new/{content}/{stringDeletionDate}")
-    public ModelAndView newMessage(ModelAndView modelAndView, @PathVariable String content,
-                                   @PathVariable String stringDeletionDate) {
-        Message message = new Message(content, shortURLService.getAvailableShortURL(),
-                getValidTimeDate(stringDeletionDate)
-        );
+    public ModelAndView newMessage(ModelAndView modelAndView, @PathVariable String content, @PathVariable String stringDeletionDate) {
+        Message message = new Message(content, shortURLService.getAvailableShortURL(), getValidTimeDate(stringDeletionDate));
 
         messageService.save(message);
 
@@ -96,8 +92,7 @@ public class MessageMapping {
     }
 
     @RequestMapping("/edit/{value}/{content}")
-    public String editMessageContent(Model model, @PathVariable String value, @PathVariable String content)
-            throws ExecutionException, InterruptedException {
+    public String editMessageContent(Model model, @PathVariable String value, @PathVariable String content) throws ExecutionException, InterruptedException {
 
         Message message = messageService.findByShortURLValue(value).get();
         message.setValue(content);
@@ -109,9 +104,7 @@ public class MessageMapping {
     }
 
     @RequestMapping("/edit/{value}/{content}/{deletionDate}")
-    public String editMessageContentAndDeletionDate(Model model, @PathVariable String value,
-                                                    @PathVariable String content, @PathVariable String deletionDate)
-            throws ExecutionException, InterruptedException {
+    public String editMessageContentAndDeletionDate(Model model, @PathVariable String value, @PathVariable String content, @PathVariable String deletionDate) throws ExecutionException, InterruptedException {
 
         Message message = messageService.findByShortURLValue(value).get();
         message.setValue(content);
@@ -125,8 +118,7 @@ public class MessageMapping {
     }
 
     @RequestMapping("/edit-time/{value}/{deletionDate}")
-    public String editMessageDeletionDate(Model model, @PathVariable String value,
-                                          @PathVariable String deletionDate) throws ExecutionException, InterruptedException {
+    public String editMessageDeletionDate(Model model, @PathVariable String value, @PathVariable String deletionDate) throws ExecutionException, InterruptedException {
 
         Message message = messageService.findByShortURLValue(value).get();
         message.setDeletionDate(getValidTimeDate(deletionDate));

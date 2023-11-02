@@ -63,7 +63,7 @@ public class UserMapping {
         throw new NoSuchElementException("Wrong credentials! Try again. http://localhost:8080/login");
     }
 
-    private void authenticateAndAddUserToModel(UserDTO userDTO, Model model, User user) {
+    synchronized private void authenticateAndAddUserToModel(UserDTO userDTO, Model model, User user) {
         authenticationContext.setUserAuthenticated(userDTO);
         model.addAttribute("user", user);
     }
