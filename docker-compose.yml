@@ -17,8 +17,8 @@ services:
     ports:
       - "8080:8080"
     environment:
-      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/pastebin
-      SPRING_ACTIVE_PROFILE: docker
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://db:5432/pastebin
+      - SPRING_ACTIVE_PROFILE=docker
     depends_on:
       - db
 volumes:
