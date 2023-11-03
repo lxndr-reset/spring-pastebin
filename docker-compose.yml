@@ -13,7 +13,7 @@ services:
 
   app:
     build: .
-    image: spring-pastebin
+    image: lxndrreset/spring-pastebin
     ports:
       - "8080:8080"
     environment:
