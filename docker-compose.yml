@@ -12,7 +12,10 @@ services:
       - ./src/main/java/com/pastebin/util/schema.sql:/docker-entrypoint-initdb.d/schema.sql:ro
 
   app:
-    build: .
+    build:
+      context: .
+      args:
+        - SPRING_ACTIVE_PROFILE=docker
     image: lxndrreset/spring-pastebin
     ports:
       - "8080:8080"
