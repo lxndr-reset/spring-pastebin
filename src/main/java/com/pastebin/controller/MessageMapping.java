@@ -45,6 +45,10 @@ public class MessageMapping {
 
     @RequestMapping("/get/{value}")
     public ModelAndView getMessageByValue(ModelAndView mav, @PathVariable String value) {
+        if (mav.getModelMap().containsAttribute("message")) {
+            return mav;
+        }
+
         Message message;
         try {
             message = messageService.findByShortURLValue(value).join();
@@ -79,8 +83,11 @@ public class MessageMapping {
     }
 
     @RequestMapping("/new/{content}/{stringDeletionDate}")
-    public ModelAndView newMessage(ModelAndView modelAndView, @PathVariable String content, @PathVariable String stringDeletionDate) {
-        Message message = new Message(content, shortURLService.getAvailableShortURL(), getValidTimeDate(stringDeletionDate));
+    public String newMessage(ModelAndView modelAndView, @PathVariable String content, @PathVariable String stringDeletionDate) {
+        Message message = new Message(content,
+                shortURLService.getAvailableShortURL(),
+                getValidTimeDate(stringDeletionDate)
+        );
 
         messageService.save(message);
 
@@ -88,7 +95,7 @@ public class MessageMapping {
         modelAndView.setViewName("get_message");
         modelAndView.setStatus(HttpStatus.CREATED);
 
-        return modelAndView;
+        return "redirect:/message/get/" + message.getShortURL().getUrlValue();
     }
 
     @RequestMapping("/edit/{value}/{content}")
