@@ -16,7 +16,7 @@ services:
       context: .
       args:
         - SPRING_ACTIVE_PROFILE=docker
-    image: lxndrreset/spring-pastebin
+    image: lxndrreset/spring-pastebin:latest
     ports:
       - "8080:8080"
     environment:
