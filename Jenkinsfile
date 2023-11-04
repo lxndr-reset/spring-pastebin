@@ -13,7 +13,7 @@ pipeline{
         stage('Build Docker image') {
             steps{
                 script{
-                    sh 'docker-compose down -d'
+                    sh 'docker-compose down'
                     withEnv(['SPRING_ACTIVE_PROFILE=docker']) {
                         sh 'docker-compose up -d'
                     }
