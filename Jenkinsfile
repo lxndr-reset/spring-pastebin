@@ -22,6 +22,7 @@ pipeline{
                             sh 'docker login -u ${dockerhubusername} -p ${dockerhubpwd}'
                         }
                         sh 'docker push lxndrreset/spring-pastebin'
+                        sh 'docker image prune'
                     }
                 }
             }
