@@ -16,7 +16,7 @@ pipeline{
                     sh 'docker-compose down'
                     withEnv(['SPRING_ACTIVE_PROFILE=docker']) {
                         sh 'docker-compose up --build -d'
-                        sh 'docker image prune -a'
+                        sh 'docker image prune -af'
                     }
                     script{
                         withCredentials([string(credentialsId: 'dockerhub-pwd', variable: 'dockerhubpwd'), string(credentialsId: 'dockerhub-uname', variable: 'dockerhubusername')]) {
