@@ -16,13 +16,13 @@ pipeline{
                     sh 'docker-compose down'
                     withEnv(['SPRING_ACTIVE_PROFILE=docker']) {
                         sh 'docker-compose up --build -d'
+                        sh 'docker image prune -a'
                     }
                     script{
                         withCredentials([string(credentialsId: 'dockerhub-pwd', variable: 'dockerhubpwd'), string(credentialsId: 'dockerhub-uname', variable: 'dockerhubusername')]) {
                             sh 'docker login -u ${dockerhubusername} -p ${dockerhubpwd}'
                         }
                         sh 'docker push lxndrreset/spring-pastebin'
-                        sh 'docker image prune'
                     }
                 }
             }
