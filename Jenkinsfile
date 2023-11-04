@@ -15,7 +15,7 @@ pipeline{
                 script{
                     sh 'docker-compose down'
                     withEnv(['SPRING_ACTIVE_PROFILE=docker']) {
-                        sh 'docker-compose up -d'
+                        sh 'docker-compose up --build -d'
                     }
                 }
             }
