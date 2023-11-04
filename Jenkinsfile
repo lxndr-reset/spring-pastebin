@@ -10,23 +10,19 @@ pipeline{
                 sh 'mvn clean install -DskipTests -DSPRING_ACTIVE_PROFILE=docker'
             }
         }
-        stage('Build Docker image') {
+        stage('Build Docker image and push to DockerHub') {
             steps{
                 script{
                     sh 'docker-compose down'
                     withEnv(['SPRING_ACTIVE_PROFILE=docker']) {
                         sh 'docker-compose up --build -d'
                     }
-                }
-            }
-        }
-        stage('Push image to DockerHub'){
-            steps{
-                script{
-                    withCredentials([string(credentialsId: 'dockerhub-pwd', variable: 'dockerhubpwd'), string(credentialsId: 'dockerhub-uname', variable: 'dockerhubusername')]) {
-                        sh 'docker login -u ${dockerhubusername} -p ${dockerhubpwd}'
+                    script{
+                        withCredentials([string(credentialsId: 'dockerhub-pwd', variable: 'dockerhubpwd'), string(credentialsId: 'dockerhub-uname', variable: 'dockerhubusername')]) {
+                            sh 'docker login -u ${dockerhubusername} -p ${dockerhubpwd}'
+                        }
+                        sh 'docker push lxndrreset/spring-pastebin'
                     }
-                    sh 'docker push lxndrreset/spring-pastebin'
                 }
             }
         }
