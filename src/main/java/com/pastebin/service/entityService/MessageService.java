@@ -1,10 +1,9 @@
 package com.pastebin.service.entityService;
 
 import com.pastebin.annotation.AvailableMessages;
-import com.pastebin.auth.AuthenticationContext;
 import com.pastebin.entity.Message;
-import com.pastebin.entity.User;
 import com.pastebin.repository.MessageRepo;
+import com.pastebin.service.user_details.UserDetails;
 import jakarta.persistence.EntityManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,6 +13,8 @@ import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.annotation.Caching;
 import org.springframework.scheduling.annotation.Async;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -29,18 +30,15 @@ import java.util.concurrent.CompletableFuture;
 public class MessageService {
     private final MessageRepo messageRepo;
     private final Logger logger = LoggerFactory.getLogger(MessageService.class);
-    private final AuthenticationContext authenticationContext;
-    private final EntityManager entityManager;
+    private final UserService userService;
 
     @Autowired
-    public MessageService(MessageRepo messageRepo, AuthenticationContext authenticationContext,
-                          EntityManager entityManager) {
+    public MessageService(MessageRepo messageRepo, UserService userService) {
         this.messageRepo = messageRepo;
-        this.authenticationContext = authenticationContext;
-        this.entityManager = entityManager;
+        this.userService = userService;
     }
 
-//    @AvailableMessages
+    @AvailableMessages
     @Cacheable(value = "message")
     @Async
     public CompletableFuture<Message> findByShortURLValue(String value) {
@@ -114,11 +112,12 @@ public class MessageService {
     @CacheEvict(value = "messages", key = "#message.shortURL.urlValue")
     public void save(Message message) {
         try {
-            if (authenticationContext.isUserAuthenticated()){
-                User authenticatedUser = authenticationContext.getAuthenticatedUser();
-                authenticatedUser = entityManager.merge(authenticatedUser);
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            if (authentication.isAuthenticated()){
+                String authenticatedUserEmail = ((UserDetails) authentication.getPrincipal()).getUsername();
 
-                message.setUser(authenticatedUser);
+                message.setUser(userService.findUserByEmail(authenticatedUserEmail).get()); // if user authenticated, he's already in database
+                //todo set message field not whole user but only his email
             }
             messageRepo.save(message);
 

@@ -1,18 +1,21 @@
 package com.pastebin.controller;
 
-import com.pastebin.auth.AuthenticationContext;
 import com.pastebin.entity.Message;
 import com.pastebin.entity.User;
 import com.pastebin.entity.date.ValidTime;
 import com.pastebin.service.entityService.MessageService;
 import com.pastebin.service.entityService.ShortURLService;
+import com.pastebin.service.user_details.UserDetails;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.authentication.AuthenticationProvider;
+import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.servlet.ModelAndView;
@@ -25,14 +28,12 @@ import java.util.concurrent.ExecutionException;
 public class MessageMapping {
     private final MessageService messageService;
     private final ShortURLService shortURLService;
-    private final AuthenticationContext authenticationContext;
     private final Logger logger = LoggerFactory.getLogger(MessageMapping.class);
 
     @Autowired
-    public MessageMapping(MessageService messageService, ShortURLService shortURLService, AuthenticationContext authenticationContext) {
+    public MessageMapping(MessageService messageService, ShortURLService shortURLService) {
         this.messageService = messageService;
         this.shortURLService = shortURLService;
-        this.authenticationContext = authenticationContext;
     }
 
     private static ValidTime getValidTimeDate(String stringDeletionDate) {
@@ -63,15 +64,11 @@ public class MessageMapping {
     }
 
     @RequestMapping("/get/all")
-    public String getAllUsersMessages(Model model, @ModelAttribute("user") User user, @ModelAttribute("email") String enteredEmail) {
-        User authenticatedUser = authenticationContext.getAuthenticatedUser();
+    public String getAllUsersMessages(Model model) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        UserDetails userDetails = (UserDetails) authentication.getPrincipal();
 
-        if (authenticatedUser.getEmail().isEmpty()) {
-            return "redirect:/";
-        }
-
-        setUserMessagesInUserIfEmpty(authenticatedUser);
-        model.addAttribute("user", authenticatedUser);
+        model.addAttribute("user", userDetails); //todo check what does getPrincipal returns
 
         return "welcome";
     }

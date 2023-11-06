@@ -3,6 +3,7 @@ package com.pastebin.service.entityService;
 import com.pastebin.entity.User;
 import com.pastebin.repository.UserRepo;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -16,7 +17,7 @@ public class UserService {
     private final PasswordEncoder encoder;
 
     @Autowired
-    public UserService(UserRepo userRepo, PasswordEncoder encoder) {
+    public UserService(UserRepo userRepo, @Lazy PasswordEncoder encoder) {
         this.userRepo = userRepo;
         this.encoder = encoder;
     }

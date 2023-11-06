@@ -1,19 +1,15 @@
 package com.pastebin.config;
 
-import com.pastebin.service.UserDetailsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Lazy;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
-import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.core.session.SessionRegistry;
 import org.springframework.security.core.session.SessionRegistryImpl;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
@@ -26,13 +22,11 @@ import org.springframework.web.servlet.handler.HandlerMappingIntrospector;
 @EnableWebSecurity
 public class SecurityConfig {
     private final HandlerMappingIntrospector introspector;
-    private final UserDetailsService userDetailsService;
 
 
     @Autowired
-    public SecurityConfig(HandlerMappingIntrospector handlerMappingIntrospector, @Lazy UserDetailsService userDetailsService) {
+    public SecurityConfig(HandlerMappingIntrospector handlerMappingIntrospector) {
         this.introspector = handlerMappingIntrospector;
-        this.userDetailsService = userDetailsService;
     }
 
     public HandlerMappingIntrospector getHandlerMappingIntrospector() {
@@ -44,17 +38,6 @@ public class SecurityConfig {
         return new SessionRegistryImpl();
     }
 
-    @Bean
-    public AuthenticationManager authenticationManager(HttpSecurity httpSecurity) {
-        AuthenticationManagerBuilder builder = httpSecurity.getSharedObject(AuthenticationManagerBuilder.class);
-
-        try {
-            builder.userDetailsService(userDetailsService).passwordEncoder(passwordEncoder());
-            return builder.build();
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-    }
 
     @Bean
     public MvcRequestMatcher.Builder mvc() {
@@ -73,6 +56,15 @@ public class SecurityConfig {
     }
 
     @Bean
+    public DaoAuthenticationProvider authenticationProvider(UserDetailsService userDetailsService, PasswordEncoder passwordEncoder) {
+        DaoAuthenticationProvider authenticationProvider = new DaoAuthenticationProvider();
+        authenticationProvider.setPasswordEncoder(passwordEncoder);
+        authenticationProvider.setUserDetailsService(userDetailsService);
+
+        return authenticationProvider;
+    }
+
+    @Bean
     public SecurityFilterChain filterChain(HttpSecurity httpSecurity,
                                            AuthenticationConfiguration authenticationConfiguration) throws Exception {
         httpSecurity.authorizeHttpRequests(urlPatterns -> urlPatterns
@@ -80,9 +72,14 @@ public class SecurityConfig {
                                 mvc().pattern("/admin/**")
                         ).hasRole("ADMIN")
 
+
+//                        .requestMatchers(
+//                                mvc().pattern("/message/get/all")
+//                        ).authenticated()
                         .requestMatchers(
-                                mvc().pattern("/message/get/all")
-                        ).authenticated()
+                                mvc().pattern("/login")
+                        ).anonymous()
+
                         .anyRequest().permitAll())
                 .sessionManagement(sessions -> {
                     sessions.maximumSessions(1);
@@ -93,6 +90,7 @@ public class SecurityConfig {
                     logout.logoutUrl("/logout").clearAuthentication(true);
                     logout.invalidateHttpSession(true);
                     logout.logoutSuccessUrl("/");
+
                 })
                 .formLogin(form -> {
                     try {

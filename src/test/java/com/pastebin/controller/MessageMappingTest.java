@@ -1,6 +1,5 @@
 package com.pastebin.controller;
 
-import com.pastebin.auth.AuthenticationContext;
 import com.pastebin.entity.Message;
 import com.pastebin.entity.ShortURL;
 import com.pastebin.entity.date.ValidTime;
@@ -39,9 +38,6 @@ class MessageMappingTest {
 
     @MockBean
     private ShortURLService shortURLService;
-
-    @MockBean
-    private AuthenticationContext authenticationContext;
 
     @Test
     void getRoot_whenRequestIsMade_thenReturnsHomePage() throws Exception {

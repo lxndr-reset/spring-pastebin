@@ -1,11 +1,9 @@
 package com.pastebin.controller;
 
-import com.pastebin.auth.AuthenticationContext;
 import com.pastebin.dto.UserDTO;
 import com.pastebin.entity.User;
+import com.pastebin.service.user_details.UserDetailsService;
 import com.pastebin.service.entityService.UserService;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
@@ -21,15 +19,15 @@ import java.util.Optional;
 @RequestMapping("/user")
 public class UserMapping {
     private final UserService userService;
-    private final Logger logger = LoggerFactory.getLogger(UserMapping.class);
     private final PasswordEncoder passwordEncoder;
-    private final AuthenticationContext authenticationContext;
+
+    private final UserDetailsService userDetailsService;
 
     @Autowired
-    public UserMapping(UserService userService, PasswordEncoder passwordEncoder, AuthenticationContext authenticationContext) {
+    public UserMapping(UserService userService, PasswordEncoder passwordEncoder, UserDetailsService userDetailsService) {
         this.userService = userService;
         this.passwordEncoder = passwordEncoder;
-        this.authenticationContext = authenticationContext;
+        this.userDetailsService = userDetailsService;
     }
 
     @RequestMapping(value = "/save", method = RequestMethod.POST)
@@ -37,10 +35,11 @@ public class UserMapping {
         String email = userDTO.getEmail();
         User user = new User(email, new String(userDTO.getPassword()));
 
-        userService.save(user);
+        userService.save(user); //throws exception if user is not unique
 
-        authenticateAndAddUserToModel(userDTO, model, user);
+        userDetailsService.loadByUser(user);
 
+        model.addAttribute("user", user);
         return "welcome";
     }
 
@@ -54,8 +53,9 @@ public class UserMapping {
             boolean matches = passwordEncoder.matches(new String(userDTO.getPassword()), user.getPassword());
 
             if (matches) {
-                authenticateAndAddUserToModel(userDTO, model, user);
+                userDetailsService.loadByUser(user);
 
+                model.addAttribute("user", user);
                 return "welcome";
             }
         }
@@ -63,8 +63,4 @@ public class UserMapping {
         throw new NoSuchElementException("Wrong credentials! Try again. http://localhost:8080/login");
     }
 
-    synchronized private void authenticateAndAddUserToModel(UserDTO userDTO, Model model, User user) {
-        authenticationContext.setUserAuthenticated(userDTO);
-        model.addAttribute("user", user);
-    }
 }
