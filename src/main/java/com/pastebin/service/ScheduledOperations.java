@@ -1,8 +1,8 @@
 package com.pastebin.service;
 
 import com.pastebin.entity.ShortURL;
-import com.pastebin.service.entityService.MessageService;
-import com.pastebin.service.entityService.ShortURLService;
+import com.pastebin.service.entity_service.MessageService;
+import com.pastebin.service.entity_service.ShortURLService;
 import com.pastebin.util.ShortURLValueGenerator;
 import org.hibernate.annotations.BatchSize;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,9 +36,7 @@ public class ScheduledOperations {
         this.shortURLService = shortURLService;
     }
 
-    @Scheduled(fixedDelay = 3
-            , initialDelay = 3
-            , timeUnit = TimeUnit.DAYS)
+    @Scheduled(fixedDelay = 3, timeUnit = TimeUnit.DAYS)
     @Transactional
     @BatchSize(size = 500)
     public void finalDeleteMessages() {
@@ -62,7 +60,6 @@ public class ScheduledOperations {
             , initialDelay = 12
             , timeUnit = TimeUnit.HOURS)
     @Transactional
-//    @Async
     public void generateLinkValue() {
         try {
             if (!isEnoughLinksAvailable()) {
