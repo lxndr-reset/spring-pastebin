@@ -4,6 +4,7 @@ import com.pastebin.annotation.AvailableMessages;
 import com.pastebin.entity.Message;
 import com.pastebin.repository.MessageRepo;
 import com.pastebin.service.user_details.UserDetails;
+import org.eclipse.jdt.internal.compiler.ast.CastExpression;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -110,20 +111,29 @@ public class MessageService {
             put = @CachePut(value = "message", key = "#message.shortURL.urlValue"))
     @CacheEvict(value = "messages", key = "#message.shortURL.urlValue")
     public void save(Message message) {
-        try {
-            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-            if (authentication.isAuthenticated()) {
-                String authenticatedUserEmail = ((UserDetails) authentication.getPrincipal()).getUsername();
+        attachUserToMessageIfAuthenticated(message);
 
-                message.setUser(userService.findUserByEmail(authenticatedUserEmail).get()); // if user authenticated, he's already in database
-                //todo set message field not whole user but only his email
-            }
-            messageRepo.save(message);
+        messageRepo.save(message);
+    }
 
-        } catch (Exception e) {
-            invalidateMessageCache(message);
-            throw e;
+    private void attachUserToMessageIfAuthenticated(Message message) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        if (!isAuthenticated(authentication)) {
+            return;
         }
+
+        Object principal = authentication.getPrincipal();
+        try {
+            String email = ((UserDetails) principal).getUsername();
+            message.setUser(userService.findUserByEmail(email).get()); //if user is logged in, he's already persists in db
+        } catch (ClassCastException e) {
+            logger.debug("user credentials is not default. User details: " + principal);
+        }
+    }
+
+    private boolean isAuthenticated(Authentication authentication) {
+        return authentication.isAuthenticated();
     }
 
     @CacheEvict(value = "message", key = "#id")
