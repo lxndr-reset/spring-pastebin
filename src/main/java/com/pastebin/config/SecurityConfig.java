@@ -96,7 +96,6 @@ public class SecurityConfig {
                 .authenticationProvider(authenticationProvider())
                 .logout(Customizer.withDefaults())
                 .formLogin(Customizer.withDefaults())
-                .rememberMe(Customizer.withDefaults())
                 .csrf(Customizer.withDefaults());
         return httpSecurity.build();
     }
