@@ -4,7 +4,6 @@ import com.pastebin.annotation.AvailableMessages;
 import com.pastebin.entity.Message;
 import com.pastebin.repository.MessageRepo;
 import com.pastebin.service.user_details.UserDetails;
-import jakarta.persistence.EntityManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -71,7 +70,7 @@ public class MessageService {
         return CompletableFuture.completedFuture(message.get());
     }
 
-    @CacheEvict(value = {"message","messages"}, key = "#value")
+    @CacheEvict(value = {"message", "messages"}, key = "#value")
     @Async
     public CompletableFuture<Message> softDeleteByValue(String value) {
         Optional<Message> byShortURLUrlValue = messageRepo.findMessageByShortURLUrlValue(value);
@@ -113,7 +112,7 @@ public class MessageService {
     public void save(Message message) {
         try {
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-            if (authentication.isAuthenticated()){
+            if (authentication.isAuthenticated()) {
                 String authenticatedUserEmail = ((UserDetails) authentication.getPrincipal()).getUsername();
 
                 message.setUser(userService.findUserByEmail(authenticatedUserEmail).get()); // if user authenticated, he's already in database
@@ -151,9 +150,8 @@ public class MessageService {
         messageRepo.deleteAllInBatch(messages);
     }
 
-    @Cacheable(value = "messages", key = "#email")
     public Set<Message> getMessagesByUser_Email(String email) {
-        logger.info("Custom Message getter was used!");
+        logger.trace("Custom Message getter was used!");
 
         return messageRepo.getMessagesByUser_Email(email);
     }

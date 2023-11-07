@@ -10,8 +10,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.authentication.AuthenticationProvider;
-import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
@@ -20,6 +18,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.servlet.ModelAndView;
 
+import javax.naming.AuthenticationException;
 import java.util.NoSuchElementException;
 import java.util.concurrent.ExecutionException;
 
@@ -64,13 +63,24 @@ public class MessageMapping {
     }
 
     @RequestMapping("/get/all")
-    public String getAllUsersMessages(Model model) {
+    public String getAllUsersMessages(Model model) throws AuthenticationException {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        UserDetails userDetails = (UserDetails) authentication.getPrincipal();
 
-        model.addAttribute("user", userDetails); //todo check what does getPrincipal returns
+            UserDetails details = (UserDetails) authentication.getPrincipal();
+            String email = details.getUsername();
 
-        return "welcome";
+            if (!email.equalsIgnoreCase("anonymousUser")) {
+                model.addAttribute("user", createTransferUserByEmail(email)); //todo refactor all model attributes from user to userDTO
+                return "welcome";
+            }
+        throw new AuthenticationException("You are not authorized");
+    }
+
+    private User createTransferUserByEmail(String email) {
+        User transferUser = new User();
+        transferUser.setEmail(email);
+        transferUser.setAllUsersMessages(messageService.getMessagesByUser_Email(email));
+        return transferUser;
     }
 
     private void setUserMessagesInUserIfEmpty(User authenticatedUser) {

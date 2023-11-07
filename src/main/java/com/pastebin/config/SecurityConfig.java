@@ -3,18 +3,18 @@ package com.pastebin.config;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
-import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
+import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.core.session.SessionRegistry;
 import org.springframework.security.core.session.SessionRegistryImpl;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationFailureHandler;
+import org.springframework.security.web.authentication.session.ConcurrentSessionControlAuthenticationStrategy;
 import org.springframework.security.web.servlet.util.matcher.MvcRequestMatcher;
 import org.springframework.web.servlet.handler.HandlerMappingIntrospector;
 
@@ -22,11 +22,12 @@ import org.springframework.web.servlet.handler.HandlerMappingIntrospector;
 @EnableWebSecurity
 public class SecurityConfig {
     private final HandlerMappingIntrospector introspector;
-
+    private final com.pastebin.service.user_details.UserDetailsService userDetailsService;
 
     @Autowired
-    public SecurityConfig(HandlerMappingIntrospector handlerMappingIntrospector) {
+    public SecurityConfig(HandlerMappingIntrospector handlerMappingIntrospector, com.pastebin.service.user_details.UserDetailsService userDetailsService) {
         this.introspector = handlerMappingIntrospector;
+        this.userDetailsService = userDetailsService;
     }
 
     public HandlerMappingIntrospector getHandlerMappingIntrospector() {
@@ -38,6 +39,15 @@ public class SecurityConfig {
         return new SessionRegistryImpl();
     }
 
+    @Bean
+    public ConcurrentSessionControlAuthenticationStrategy concurrentSessionControlAuthenticationStrategy() {
+        ConcurrentSessionControlAuthenticationStrategy concurrentSessionControlAuthenticationStrategy =
+                new ConcurrentSessionControlAuthenticationStrategy(sessionRegistry());
+
+        concurrentSessionControlAuthenticationStrategy.setMaximumSessions(1);
+
+        return concurrentSessionControlAuthenticationStrategy;
+    }
 
     @Bean
     public MvcRequestMatcher.Builder mvc() {
@@ -56,26 +66,24 @@ public class SecurityConfig {
     }
 
     @Bean
-    public DaoAuthenticationProvider authenticationProvider(UserDetailsService userDetailsService, PasswordEncoder passwordEncoder) {
+    public AuthenticationProvider authenticationProvider() {
         DaoAuthenticationProvider authenticationProvider = new DaoAuthenticationProvider();
-        authenticationProvider.setPasswordEncoder(passwordEncoder);
+        authenticationProvider.setPasswordEncoder(passwordEncoder());
         authenticationProvider.setUserDetailsService(userDetailsService);
 
         return authenticationProvider;
     }
 
     @Bean
-    public SecurityFilterChain filterChain(HttpSecurity httpSecurity,
-                                           AuthenticationConfiguration authenticationConfiguration) throws Exception {
+    public SecurityFilterChain filterChain(HttpSecurity httpSecurity) throws Exception {
         httpSecurity.authorizeHttpRequests(urlPatterns -> urlPatterns
                         .requestMatchers(
                                 mvc().pattern("/admin/**")
                         ).hasRole("ADMIN")
 
-
-//                        .requestMatchers(
-//                                mvc().pattern("/message/get/all")
-//                        ).authenticated()
+                        .requestMatchers(
+                                mvc().pattern("/message/get/all")
+                        ).authenticated()
                         .requestMatchers(
                                 mvc().pattern("/login")
                         ).anonymous()
@@ -83,30 +91,13 @@ public class SecurityConfig {
                         .anyRequest().permitAll())
                 .sessionManagement(sessions -> {
                     sessions.maximumSessions(1);
+                    sessions.sessionAuthenticationStrategy(concurrentSessionControlAuthenticationStrategy());
                 })
-                .authenticationManager(authenticationConfiguration.getAuthenticationManager())
-                .logout(logout -> {
-                    logout.deleteCookies("JSESSIONID", "remove");
-                    logout.logoutUrl("/logout").clearAuthentication(true);
-                    logout.invalidateHttpSession(true);
-                    logout.logoutSuccessUrl("/");
-
-                })
-                .formLogin(form -> {
-                    try {
-                        form.loginPage("/login");
-                    } catch (Exception e) {
-                        throw new RuntimeException(e);
-                    }
-                })
-                .csrf(csrf -> {
-                            try {
-                                csrf.init(httpSecurity);
-                            } catch (Exception e) {
-                                throw new RuntimeException(e);
-                            }
-                        }
-                );
+                .authenticationProvider(authenticationProvider())
+                .logout(Customizer.withDefaults())
+                .formLogin(Customizer.withDefaults())
+                .rememberMe(Customizer.withDefaults())
+                .csrf(Customizer.withDefaults());
         return httpSecurity.build();
     }
 }
