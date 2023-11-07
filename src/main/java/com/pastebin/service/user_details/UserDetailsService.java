@@ -1,4 +1,4 @@
-package com.pastebin.service.userDetails;
+package com.pastebin.service.user_details;
 
 import com.pastebin.entity.User;
 import com.pastebin.service.entityService.UserService;
@@ -22,7 +22,7 @@ public class UserDetailsService implements org.springframework.security.core.use
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
         User user = userService.findUserByEmail(email).orElseThrow(() -> new NoSuchElementException("User not found"));
 
-        return new com.pastebin.service.userDetails.UserDetails(user);
+        return new com.pastebin.service.user_details.UserDetails(user);
     }
 
     /**
@@ -33,6 +33,6 @@ public class UserDetailsService implements org.springframework.security.core.use
      * @throws UsernameNotFoundException
      */
     public UserDetails loadByUser(User user) throws UsernameNotFoundException {
-        return new com.pastebin.service.userDetails.UserDetails(user);
+        return new com.pastebin.service.user_details.UserDetails(user);
     }
 }

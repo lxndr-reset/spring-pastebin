@@ -3,7 +3,7 @@ package com.pastebin.service.entityService;
 import com.pastebin.annotation.AvailableMessages;
 import com.pastebin.entity.Message;
 import com.pastebin.repository.MessageRepo;
-import com.pastebin.service.userDetails.UserDetails;
+import com.pastebin.service.user_details.UserDetails;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
