@@ -14,11 +14,4 @@ public class RootMapping {
 
         return "registration";
     }
-
-    @RequestMapping(value = "/login")
-    public String login(Model model) {
-        model.addAttribute("user_dto", new UserDTO());
-
-        return "login";
-    }
 }

@@ -1,8 +1,6 @@
 package com.pastebin.service.user_details;
 
 import com.pastebin.entity.User;
-import org.springframework.security.authentication.AuthenticationProvider;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
@@ -14,7 +12,6 @@ public class UserDetails implements org.springframework.security.core.userdetail
     private final String email;
     private final String password;
     private final List<GrantedAuthority> authorities;
-
 
     public UserDetails(User user) {
         this.email = user.getEmail();
