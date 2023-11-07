@@ -5,7 +5,7 @@ import com.pastebin.entity.User;
 import com.pastebin.entity.date.ValidTime;
 import com.pastebin.service.entityService.MessageService;
 import com.pastebin.service.entityService.ShortURLService;
-import com.pastebin.service.user_details.UserDetails;
+import com.pastebin.service.userDetails.UserDetails;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;

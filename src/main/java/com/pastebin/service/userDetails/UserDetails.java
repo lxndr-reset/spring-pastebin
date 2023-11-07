@@ -1,4 +1,4 @@
-package com.pastebin.service.user_details;
+package com.pastebin.service.userDetails;
 
 import com.pastebin.entity.User;
 import org.springframework.security.core.GrantedAuthority;

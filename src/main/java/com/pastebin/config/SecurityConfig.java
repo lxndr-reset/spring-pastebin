@@ -22,10 +22,10 @@ import org.springframework.web.servlet.handler.HandlerMappingIntrospector;
 @EnableWebSecurity
 public class SecurityConfig {
     private final HandlerMappingIntrospector introspector;
-    private final com.pastebin.service.user_details.UserDetailsService userDetailsService;
+    private final com.pastebin.service.userDetails.UserDetailsService userDetailsService;
 
     @Autowired
-    public SecurityConfig(HandlerMappingIntrospector handlerMappingIntrospector, com.pastebin.service.user_details.UserDetailsService userDetailsService) {
+    public SecurityConfig(HandlerMappingIntrospector handlerMappingIntrospector, com.pastebin.service.userDetails.UserDetailsService userDetailsService) {
         this.introspector = handlerMappingIntrospector;
         this.userDetailsService = userDetailsService;
     }
