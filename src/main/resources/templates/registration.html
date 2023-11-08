@@ -2,22 +2,34 @@
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="ISO-8859-1">
-    <link crossorigin="anonymous" href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.0/dist/css/bootstrap.min.css"
-          integrity="sha384-KyZXEAg3QhqLMpG8r+8fhAXLRk2vvoC2f3B09zVXn8CA5QIVfZOJ3BCsw2P0p/We" rel="stylesheet">
-    <script crossorigin="anonymous"
-            integrity="sha384-eMNCOe7tC1doHpGoWe/6oMVemdAVTMs2xqW4mwXrXsW0L84Iytr2wi5v2QjrP/xp"
-            src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.3/dist/umd/popper.min.js"></script>
-    <script crossorigin="anonymous"
-            integrity="sha384-cn7l7gDp0eyniUwwAZgrzD06kc/tftFf19TOAs2zVinnD/C7E91j9yyk5//jjpt/"
-            src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.0/dist/js/bootstrap.min.js"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
     <title>Register</title>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet">
+
+    <style>
+        .container {
+            max-width: 500px;
+        }
+        input[type=email], input[type=password] {
+            width: 100%;
+            padding: 15px;
+            margin: 5px 0 10px 0;
+            display: inline-block;
+            border: none;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        #message {
+            margin-top: 10px;
+        }
+        .btn {
+            margin-top: 20px;
+        }
+    </style>
 </head>
 <body>
-
 <div class="container mt-5">
-    <div class="card" style="width: 55rem; ">
-        <div class="card-header text-center bg-info ">
+    <div class="card">
+        <div class="card-header text-center">
             <h3>Register</h3>
         </div>
         <div class="card-body">
@@ -25,24 +37,23 @@
                 <div class="form-group">
                     <label for="input-email">Email</label>
                     <input aria-describedby="emailHelp" class="form-control" id="input-email" th:field="*{email}"
-                           type="email">
+                           type="email" placeholder="Enter your email">
                 </div>
 
                 <div class="form-group">
                     <label for="input-password">Password</label>
-                    <input class="form-control" id="input-password" th:field="*{password}" type="password">
+                    <input class="form-control" id="input-password" th:field="*{password}" type="password" placeholder="Enter your password">
                 </div>
 
                 <div class="form-group">
                     <label for="input-password-confirm">Confirm Password</label>
                     <input class="form-control" id="input-password-confirm" name="passwordConfirm"
                            onkeyup="checkPassword()"
-                           type="password">
+                           type="password" placeholder="Confirm your password">
                     <span id='message'></span>
                 </div>
 
-                <p></p>
-                <button class="btn btn-primary" disabled id="submit-button" type="submit">Submit</button>
+                <button class="btn btn-primary mt-3" disabled id="submit-button" type="submit">Submit</button>
 
             </form>
         </div>
@@ -52,14 +63,15 @@
     function checkPassword() {
         var password = document.getElementById('input-password').value;
         var confirmPassword = document.getElementById('input-password-confirm').value;
+        var message = document.getElementById('message');
 
         if (password === confirmPassword) {
-            document.getElementById('message').style.color = 'green';
-            document.getElementById('message').innerHTML = 'Passwords match';
+            message.style.color = 'green';
+            message.innerHTML = 'Passwords match';
             document.getElementById('submit-button').disabled = false;
         } else {
-            document.getElementById('message').style.color = 'red';
-            document.getElementById('message').innerHTML = 'Passwords do not match';
+            message.style.color = 'red';
+            message.innerHTML = 'Passwords do not match';
             document.getElementById('submit-button').disabled = true;
         }
     }

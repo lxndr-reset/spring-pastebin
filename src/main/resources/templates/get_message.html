@@ -12,7 +12,7 @@
         </div>
         <div class="card-body">
             <p><strong>Id: </strong> <span th:text="${message.getId()}"></span></p>
-            <p><strong>Link: </strong><a th:href="@{'http://localhost:8080/message/get/' + ${message.getShortURL().getUrlValue()}}">http://localhost:8080/message/get/<span
+            <p><strong>Link: </strong><a th:href="@{'http://localhost:8080/message/get/' + ${message.getShortURL().getUrlValue()}}">localhost:8080/message/get/<span
                     th:text="${message.shortURL.urlValue}"></span></a></p>
             <p><strong>Message: </strong> <span th:text="${message.getValue()}"></span></p>
             <p><strong>Deletion date:</strong> <span th:text="${message.getDeletionDate() != null ? message.getDeletionDate() : 'Never'}"></span></p>

@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="ISO-8859-1">
+    <title>Login</title>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+<div class="container mt-5">
+    <div class="card">
+        <div class="card-header">
+            <h3>All your messages</h3>
+        </div>
+        <div class="card-body">
+            <p><strong>Email:</strong> <span th:object="${user}" th:text="${user.email}"></span></p>
+            <hr/>
+            <div class="all-messages">
+                <p><strong>All your messages:</strong></p>
+                <table class="table table-bordered">
+                    <thead class="thead-light">
+                    <tr>
+                        <th>Message</th>
+                        <th>URL</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="message : ${user.allUsersMessages}">
+                        <td th:text="${message.getValue()}"></td>
+                        <td th:with="fullUrl=${message.getShortURL().getUrlValue()}">
+                            <a th:href="@{'http://localhost:8080/message/get/'+${fullUrl}}"
+                               th:text="'localhost:8080/message/get/'+${fullUrl}"
+                            ></a>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+</body>
+</html>

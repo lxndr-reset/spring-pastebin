@@ -72,7 +72,7 @@ public class MessageMapping {
 
         if (!email.equalsIgnoreCase("anonymousUser")) {
             model.addAttribute("user", createTransferUserByEmail(email)); //todo refactor all model attributes from user to userDTO
-            return "welcome";
+            return "get_all_messages";
         }
         throw new AuthenticationException("You are not authorized");
     }

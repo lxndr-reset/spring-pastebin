@@ -38,7 +38,7 @@ public class UserMapping {
         );
 
         model.addAttribute("user", user);
-        return "welcome";
+        return "get_all_messages";
     }
 
 }
