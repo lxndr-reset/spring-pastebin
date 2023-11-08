@@ -1,4 +1,4 @@
-package com.pastebin.entity.date;
+package com.pastebin.date;
 
 import java.sql.Timestamp;
 import java.util.Calendar;

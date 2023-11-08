@@ -1,7 +1,7 @@
 package com.pastebin.entity;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.pastebin.entity.date.ValidTime;
+import com.pastebin.date.ValidTime;
 import jakarta.persistence.*;
 import org.springframework.stereotype.Component;
 

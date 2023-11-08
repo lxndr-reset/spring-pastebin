@@ -2,7 +2,7 @@ package com.pastebin.service;
 
 import com.pastebin.entity.Message;
 import com.pastebin.entity.ShortURL;
-import com.pastebin.entity.date.ValidTime;
+import com.pastebin.date.ValidTime;
 import com.pastebin.repository.MessageRepo;
 import com.pastebin.service.entityService.MessageService;
 import org.junit.jupiter.api.BeforeAll;

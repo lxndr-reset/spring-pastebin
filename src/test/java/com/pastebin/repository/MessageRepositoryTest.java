@@ -3,7 +3,7 @@ package com.pastebin.repository;
 import com.pastebin.entity.Message;
 import com.pastebin.entity.ShortURL;
 import com.pastebin.entity.User;
-import com.pastebin.entity.date.ValidTime;
+import com.pastebin.date.ValidTime;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
