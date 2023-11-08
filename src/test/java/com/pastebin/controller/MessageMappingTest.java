@@ -1,18 +1,15 @@
 package com.pastebin.controller;
 
+import com.pastebin.date.ValidTime;
 import com.pastebin.entity.Message;
 import com.pastebin.entity.ShortURL;
-import com.pastebin.date.ValidTime;
 import com.pastebin.service.entityService.MessageService;
 import com.pastebin.service.entityService.ShortURLService;
 import org.junit.jupiter.api.Test;
-import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 
@@ -25,9 +22,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@RunWith(SpringRunner.class)
 @AutoConfigureMockMvc
-@ActiveProfiles("local")
 @SpringBootTest
 class MessageMappingTest {
     @Autowired
@@ -35,9 +30,6 @@ class MessageMappingTest {
 
     @MockBean
     private MessageService messageService;
-
-    @MockBean
-    private ShortURLService shortURLService;
 
     @Test
     void getRoot_whenRequestIsMade_thenReturnsHomePage() throws Exception {

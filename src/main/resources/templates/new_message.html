@@ -2,39 +2,52 @@
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
     <title>New Message</title>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet">
     <style>
         textarea {
-            width: 300px;
-            height: 150px;
+            width: 100%;
+            min-height: 150px;
             overflow: auto;
+            border-radius: 5px;
+            border: 1px solid #ced4da;
+            padding: 10px;
+        }
+
+        .control-group {
+            margin-bottom: 15px;
         }
     </style>
 </head>
 <body>
-<div class="card-body">
-
-    <form method="post" th:action="@{/message/submit}" th:object="${message}" >
-        <div>
-            <label for="text">Text of message:</label>
-            <p></p>
-            <textarea id="text" placeholder="Enter your message here" th:field="*{value}"></textarea>
+<div class="container mt-5">
+    <div class="card">
+        <div class="card-header">
+            <h2 class="mb-0">New Message</h2>
         </div>
-        <div>
-            <label for="deletionTime">Deletion time:</label>
-            <select id="deletionTime" th:field="*{deletionDateText}">
-                <option value="ONE_HOUR">One Hour</option>
-                <option value="ONE_DAY">One Day</option>
-                <option value="ONE_WEEK">One Week</option>
-                <option value="TWO_WEEKS">Two Weeks</option>
-                <option value="ONE_MONTH">One Month</option>
-                <option value="THREE_MONTHS">Three Months</option>
-            </select>
+        <div class="card-body">
+            <form method="post" th:action="@{/message/submit}" th:object="${message}" >
+                <div class="control-group">
+                    <label for="text">Text of message:</label>
+                    <textarea id="text" placeholder="Enter your message here" th:field="*{value}"></textarea>
+                </div>
+                <div class="control-group">
+                    <label for="deletionTime">Deletion time:</label>
+                    <select id="deletionTime" th:field="*{deletionDateText}" class="form-control">
+                        <option value="ONE_HOUR">One Hour</option>
+                        <option value="ONE_DAY">One Day</option>
+                        <option value="ONE_WEEK">One Week</option>
+                        <option value="TWO_WEEKS">Two Weeks</option>
+                        <option value="ONE_MONTH">One Month</option>
+                        <option value="THREE_MONTHS">Three Months</option>
+                    </select>
+                </div>
+                <div class="control-group">
+                    <button class="btn btn-primary mt-3" type="submit">Submit</button>
+                </div>
+            </form>
         </div>
-        <p></p>
-        <div>
-            <button class="btn btn-primary" type="submit">Submit</button>
-        </div>
-    </form>
+    </div>
 </div>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
 </body>
 </html>

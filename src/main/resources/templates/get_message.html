@@ -1,17 +1,26 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.w3.org/1999/xhtml">
 <head>
     <title>Message Page</title>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet">
 </head>
 <body>
-<h1>Message Details</h1>
+<div class="container mt-5">
+    <div class="card">
+        <div class="card-header">
+            <h2 class="mb-0">Message Details</h2>
+        </div>
+        <div class="card-body">
+            <p><strong>Id: </strong> <span th:text="${message.getId()}"></span></p>
+            <p><strong>Link: </strong><a th:href="@{'http://localhost:8080/message/get/' + ${message.getShortURL().getUrlValue()}}">http://localhost:8080/message/get/<span
+                    th:text="${message.shortURL.urlValue}"></span></a></p>
+            <p><strong>Message: </strong> <span th:text="${message.getValue()}"></span></p>
+            <p><strong>Deletion date:</strong> <span th:text="${message.getDeletionDate() != null ? message.getDeletionDate() : 'Never'}"></span></p>
 
-<p><strong>Id: </strong> <span th:text="${message.getId()}"></span></p>
-<p><strong>Link: </strong> <a th:href="@{'http://localhost:8080/message/get/' + ${message.getShortURL().getUrlValue()}}">http://localhost:8080/message/get/<span
-        th:text="${message.shortURL.urlValue}"></span></a></p>
-<p><strong>Message: </strong> <span th:text="${message.getValue()}"></span></p>
-<p><strong>Deletion date:</strong> <span
-        th:text="${message.getDeletionDate() != null ? message.getDeletionDate() : 'Never'}"></span></p>
-
+            <div ></div>
+        </div>
+    </div>
+</div>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
 </body>
 </html>
