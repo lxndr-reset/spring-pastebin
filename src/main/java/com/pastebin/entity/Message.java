@@ -20,6 +20,17 @@ public class Message {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    public String getDeletionDateText() {
+        return deletionDateText;
+    }
+
+    public void setDeletionDateText(String deletionDateText) {
+        this.deletionDateText = deletionDateText;
+    }
+
+    @Transient
+    private String deletionDateText;
+
     @Column(name = "message_value")
     private String value;
 
@@ -51,9 +62,15 @@ public class Message {
         url.setMessage(this);
         this.setDeletionDate(deletionDate);
     }
+    public Message(String value, ShortURL url, String deletionDateText) {
+        this.value = value;
+        this.shortURL = url;
+        url.setMessage(this);
+        this.deletionDateText = deletionDateText;
+    }
 
     @VisibleForTesting
-    public Message(String value, Timestamp deletionDate, ShortURL shortURL) {
+    public Message(String value , ShortURL shortURL, Timestamp deletionDate) {
         this.value = value;
         this.deletionDate = deletionDate;
         this.shortURL = shortURL;
@@ -93,6 +110,7 @@ public class Message {
 
     public void setShortURL(ShortURL shortURL) {
         this.shortURL = shortURL;
+        shortURL.setMessage(this);
     }
 
     public Long getId() {
@@ -112,7 +130,7 @@ public class Message {
         this.value = value;
     }
 
-    public Boolean isDeleted() {
+    public Boolean getDeleted() {
         return deleted;
     }
 
@@ -138,6 +156,10 @@ public class Message {
 
     public void setDeletionDate(Timestamp delete_date) {
         this.deletionDate = delete_date;
+    }
+
+    public void setDeletionDate(String string) {
+        this.deletionDate = ValidTime.valueOf(string).toTimeStamp();
     }
 
     public void setDeletionDate(ValidTime delete_date) {

@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>New Message</title>
+    <style>
+        textarea {
+            width: 300px;
+            height: 150px;
+            overflow: auto;
+        }
+    </style>
+</head>
+<body>
+<div class="card-body">
+
+    <form method="post" th:action="@{/message/submit}" th:object="${message}" >
+        <div>
+            <label for="text">Text of message:</label>
+            <p></p>
+            <textarea id="text" placeholder="Enter your message here" th:field="*{value}"></textarea>
+        </div>
+        <div>
+            <label for="deletionTime">Deletion time:</label>
+            <select id="deletionTime" th:field="*{deletionDateText}">
+                <option value="ONE_HOUR">One Hour</option>
+                <option value="ONE_DAY">One Day</option>
+                <option value="ONE_WEEK">One Week</option>
+                <option value="TWO_WEEKS">Two Weeks</option>
+                <option value="ONE_MONTH">One Month</option>
+                <option value="THREE_MONTHS">Three Months</option>
+            </select>
+        </div>
+        <p></p>
+        <div>
+            <button class="btn btn-primary" type="submit">Submit</button>
+        </div>
+    </form>
+</div>
+</body>
+</html>

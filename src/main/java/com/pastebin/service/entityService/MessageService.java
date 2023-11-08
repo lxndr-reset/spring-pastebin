@@ -4,7 +4,6 @@ import com.pastebin.annotation.AvailableMessages;
 import com.pastebin.entity.Message;
 import com.pastebin.repository.MessageRepo;
 import com.pastebin.service.user_details.UserDetails;
-import org.eclipse.jdt.internal.compiler.ast.CastExpression;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -49,7 +48,7 @@ public class MessageService {
         if (retrievedOptionalMessage.isPresent()) {
             Message retrievedMessage = retrievedOptionalMessage.get();
 
-            if (!retrievedMessage.isDeleted()) {
+            if (!retrievedMessage.getDeleted()) {
                 return CompletableFuture.completedFuture(retrievedMessage);
             }
             exceptionMessage = "Message on link https://localhost:8080/message/get/" + value + " is deleted";
@@ -64,7 +63,7 @@ public class MessageService {
     @CacheEvict(value = "messages", key = "#id")
     public CompletableFuture<Message> findById(Long id) {
         Optional<Message> message = messageRepo.findById(id);
-        if (message.isEmpty() || message.get().isDeleted() || System.currentTimeMillis() >
+        if (message.isEmpty() || message.get().getDeleted() || System.currentTimeMillis() >
                 message.get().getDeletionDate().getTime()) {
             throw new NoSuchElementException("Message with id " + id + " not found");
         }
@@ -87,7 +86,8 @@ public class MessageService {
     private Message softDeletedMessageIfExists(Optional<Message> byShortURLUrlValue) {
         if (byShortURLUrlValue.isPresent()) {
             Message message = byShortURLUrlValue.get();
-            if (!message.isDeleted()) {
+
+            if (!message.getDeleted()) {
                 message.setDeleted(true);
                 messageRepo.save(message);
                 return message;
@@ -106,6 +106,9 @@ public class MessageService {
     }
 
 
+    /**
+     * Saves a message and creates adds a user if he is logged in
+     */
     @AvailableMessages
     @Caching(evict = @CacheEvict(value = "message", key = "#message.shortURL.urlValue"),
             put = @CachePut(value = "message", key = "#message.shortURL.urlValue"))

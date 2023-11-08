@@ -1,21 +1,22 @@
 package com.pastebin.controller;
 
+import com.pastebin.date.ValidTime;
 import com.pastebin.entity.Message;
 import com.pastebin.entity.User;
-import com.pastebin.date.ValidTime;
 import com.pastebin.service.entityService.MessageService;
 import com.pastebin.service.entityService.ShortURLService;
 import com.pastebin.service.user_details.UserDetails;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.servlet.ModelAndView;
 
 import javax.naming.AuthenticationException;
@@ -66,13 +67,13 @@ public class MessageMapping {
     public String getAllUsersMessages(Model model) throws AuthenticationException {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
-            UserDetails details = (UserDetails) authentication.getPrincipal();
-            String email = details.getUsername();
+        UserDetails details = (UserDetails) authentication.getPrincipal();
+        String email = details.getUsername();
 
-            if (!email.equalsIgnoreCase("anonymousUser")) {
-                model.addAttribute("user", createTransferUserByEmail(email)); //todo refactor all model attributes from user to userDTO
-                return "welcome";
-            }
+        if (!email.equalsIgnoreCase("anonymousUser")) {
+            model.addAttribute("user", createTransferUserByEmail(email)); //todo refactor all model attributes from user to userDTO
+            return "welcome";
+        }
         throw new AuthenticationException("You are not authorized");
     }
 
@@ -80,33 +81,56 @@ public class MessageMapping {
         User transferUser = new User();
         transferUser.setEmail(email);
         transferUser.setAllUsersMessages(messageService.getMessagesByUser_Email(email));
+
         return transferUser;
     }
 
-    private void setUserMessagesInUserIfEmpty(User authenticatedUser) {
-        if (authenticatedUser.getAllUsersMessages() == null) {
-            authenticatedUser.setAllUsersMessages(messageService.getMessagesByUser_Email(authenticatedUser.getEmail()));
-        }
-    }
 
     @RequestMapping("/new/{content}/{stringDeletionDate}")
-    public String newMessage(ModelAndView modelAndView, @PathVariable String content, @PathVariable String stringDeletionDate) {
+    public ModelAndView newMessage(ModelAndView modelAndView, @PathVariable String content, @PathVariable String stringDeletionDate) {
         Message message = new Message(content,
                 shortURLService.getAvailableShortURL(),
                 getValidTimeDate(stringDeletionDate)
         );
 
+        return persistMessageAndGetMAV(message, modelAndView);
+    }
+
+
+    @RequestMapping(value = "/new")
+    public ModelAndView newMessage(ModelAndView modelAndView) {
+        modelAndView.setViewName("new_message");
+        modelAndView.getModelMap().addAttribute("message", new Message());
+
+        return modelAndView;
+    }
+
+    @RequestMapping(value = "/submit", method = RequestMethod.POST)
+    public ModelAndView submitMessage(@ModelAttribute("message") Message message,
+                                      ModelAndView modelAndView) {
+        assert message != null;
+
+        if (message.getDeletionDateText() != null){
+            message.setDeletionDate(message.getDeletionDateText());
+        }
+
+        message.setShortURL(shortURLService.getAvailableShortURL());
+
+        return persistMessageAndGetMAV(message, modelAndView);
+    }
+    private ModelAndView persistMessageAndGetMAV(Message message, ModelAndView modelAndView) {
         messageService.save(message);
 
-        modelAndView.getModelMap().addAttribute("message", message);
-        modelAndView.setViewName("get_message");
-        modelAndView.setStatus(HttpStatus.CREATED);
+        modelAndView.setViewName(
+                "redirect:/message/get/" + message.getShortURL().getUrlValue()
+        );
 
-        return "redirect:/message/get/" + message.getShortURL().getUrlValue();
+        return modelAndView;
     }
 
     @RequestMapping("/edit/{value}/{content}")
-    public String editMessageContent(Model model, @PathVariable String value, @PathVariable String content) throws ExecutionException, InterruptedException {
+    public String editMessageContent(Model model, @PathVariable String value, @PathVariable String content)
+            throws ExecutionException, InterruptedException {
 
         Message message = messageService.findByShortURLValue(value).get();
         message.setValue(content);

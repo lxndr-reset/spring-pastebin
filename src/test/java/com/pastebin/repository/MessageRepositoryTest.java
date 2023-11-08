@@ -64,12 +64,12 @@ class MessageRepositoryTest {
     }
     @Test
     void testDeleteByDeletedIsTrueOrExpired() {
-        Message message1 = new Message("test1", Timestamp.from(Instant.now()), new ShortURL("a"));
+        Message message1 = new Message("test1",  new ShortURL("a"), Timestamp.from(Instant.now()));
         Message message2 = new Message("test2", new ShortURL("b"), ValidTime.ONE_HOUR);
         message2.setDeleted(true);
 
         Message message3 = new Message("test3", new ShortURL("c"), ValidTime.ONE_HOUR);
-        Message message4 = new Message("test4", Timestamp.from(Instant.now()), new ShortURL("d"));
+        Message message4 = new Message("test4", new ShortURL("d"), Timestamp.from(Instant.now()));
         message4.setDeleted(true);
 
         List<Message> messageEntities = Arrays.asList(message1, message2, message3, message4);
