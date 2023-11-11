@@ -57,21 +57,8 @@ public class MessageService {
 
     }
 
-    @AvailableMessages
     @Async
-    @Cacheable(value = "message", key = "#id")
-    @CacheEvict(value = "messages", key = "#id")
-    public CompletableFuture<Message> findById(Long id) {
-        Optional<Message> message = messageRepo.findById(id);
-        if (message.isEmpty() || message.get().getDeleted() || System.currentTimeMillis() >
-                message.get().getDeletionDate().getTime()) {
-            throw new NoSuchElementException("Message with id " + id + " not found");
-        }
-        return CompletableFuture.completedFuture(message.get());
-    }
-
-    @CacheEvict(value = {"message", "messages"}, key = "#value")
-    @Async
+    @CacheEvict(value = {"message", "messages"})
     public CompletableFuture<Message> softDeleteByValue(String value) {
         Optional<Message> byShortURLUrlValue = messageRepo.findMessageByShortURLUrlValue(value);
 
@@ -96,23 +83,14 @@ public class MessageService {
         return null;
     }
 
-    @CacheEvict(value = "message", key = "#id")
-    @Async
-    public CompletableFuture<Message> softDeleteById(Long id) {
-        Message message = softDeletedMessageIfExists(messageRepo.findById(id));
-        if (message != null) return CompletableFuture.completedFuture(message);
-
-        throw new NoSuchElementException("Message on link https://localhost:8080/message/get/" + id + " does not exists");
-    }
-
-
     /**
      * Saves a message and creates adds a user if he is logged in
      */
     @AvailableMessages
-    @Caching(evict = @CacheEvict(value = "message", key = "#message.shortURL.urlValue"),
-            put = @CachePut(value = "message", key = "#message.shortURL.urlValue"))
-    @CacheEvict(value = "messages", key = "#message.shortURL.urlValue")
+    @Caching(
+            evict = @CacheEvict(value = {"message", "messages"}),
+            put = @CachePut(value = "message")
+    )
     public void save(Message message) {
         attachUserToMessageIfAuthenticated(message);
 
@@ -139,24 +117,18 @@ public class MessageService {
         return authentication.isAuthenticated();
     }
 
-    @CacheEvict(value = "message", key = "#id")
-    @Async
-    public void deleteById(Long id) {
-        messageRepo.deleteById(id);
-    }
 
-    @CacheEvict(value = "message", key = "#message.shortURL.urlValue")
+    @CacheEvict(value = "message")
     public void invalidateMessageCache(Message message) {
     }
 
-    @CachePut(value = "message", key = "#message.shortURL.urlValue")
+    @CachePut(value = "message")
     public void validateMessageCache(Message message) {
     }
 
     @Async
     public void deleteAllByDeletedIsTrueOrDeletionDateIsGreaterThanEqual() {
-        List<Message> messages = messageRepo.findAllByDeletedIsTrueOrDeletionDateIsLessThanEqual(
-                new Timestamp(System.currentTimeMillis()));
+        List<Message> messages = messageRepo.findAllByDeletedIsTrueOrDeletionDateIsLessThanEqual(new Timestamp(System.currentTimeMillis()));
 
         messages.forEach(this::invalidateMessageCache);
 
@@ -164,8 +136,6 @@ public class MessageService {
     }
 
     public Set<Message> getMessagesByUser_Email(String email) {
-        logger.trace("Custom Message getter was used!");
-
         return messageRepo.getMessagesByUser_Email(email);
     }
 }
