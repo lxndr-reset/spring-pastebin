@@ -40,7 +40,9 @@ public class MessageMapping {
         try {
             return ValidTime.valueOf(stringDeletionDate);
         } catch (IllegalArgumentException e) {
-            throw new IllegalArgumentException("Wrong or missing option " + stringDeletionDate + ".\n Available options: " + "ONE_HOUR, ONE_DAY, ONE_WEEK, TWO_WEEKS, ONE_MONTH, THREE_MONTHS");
+            throw new IllegalArgumentException("Wrong or missing option " + stringDeletionDate +
+                    ".\n Available options: " + "ONE_HOUR, ONE_DAY, ONE_WEEK, TWO_WEEKS, ONE_MONTH, THREE_MONTHS"
+            );
         }
     }
 
@@ -57,6 +59,7 @@ public class MessageMapping {
             logger.debug("Element by value '" + value + "' not found");
             throw e;
         }
+
         mav.getModelMap().addAttribute("message", message);
         mav.setViewName("get_message");
 
@@ -74,6 +77,7 @@ public class MessageMapping {
             model.addAttribute("user", createTransferUserByEmail(email)); //todo refactor all model attributes from user to userDTO
             return "get_all_messages";
         }
+
         throw new AuthenticationException("You are not authorized");
     }
 
@@ -87,7 +91,8 @@ public class MessageMapping {
 
 
     @RequestMapping("/new/{content}/{stringDeletionDate}")
-    public ModelAndView newMessage(ModelAndView modelAndView, @PathVariable String content, @PathVariable String stringDeletionDate) {
+    public ModelAndView newMessage(ModelAndView modelAndView, @PathVariable String content,
+                                   @PathVariable String stringDeletionDate) {
         Message message = new Message(content,
                 shortURLService.getAvailableShortURL(),
                 getValidTimeDate(stringDeletionDate)
@@ -113,14 +118,12 @@ public class MessageMapping {
         if (message.getDeletionDateText() != null){
             message.setDeletionDate(message.getDeletionDateText());
         }
-
         message.setShortURL(shortURLService.getAvailableShortURL());
 
         return persistMessageAndGetMAV(message, modelAndView);
     }
     private ModelAndView persistMessageAndGetMAV(Message message, ModelAndView modelAndView) {
         messageService.save(message);
-
         modelAndView.setViewName(
                 "redirect:/message/get/" + message.getShortURL().getUrlValue()
         );
@@ -142,12 +145,13 @@ public class MessageMapping {
     }
 
     @RequestMapping("/edit/{value}/{content}/{deletionDate}")
-    public String editMessageContentAndDeletionDate(Model model, @PathVariable String value, @PathVariable String content, @PathVariable String deletionDate) throws ExecutionException, InterruptedException {
+    public String editMessageContentAndDeletionDate(Model model, @PathVariable String value,
+                                                    @PathVariable String content, @PathVariable String deletionDate)
+            throws ExecutionException, InterruptedException {
 
         Message message = messageService.findByShortURLValue(value).get();
         message.setValue(content);
         message.setDeletionDate(getValidTimeDate(deletionDate));
-
         messageService.save(message);
 
         model.addAttribute("message", message);
@@ -156,12 +160,13 @@ public class MessageMapping {
     }
 
     @RequestMapping("/edit-time/{value}/{deletionDate}")
-    public String editMessageDeletionDate(Model model, @PathVariable String value, @PathVariable String deletionDate) throws ExecutionException, InterruptedException {
+    public String editMessageDeletionDate(Model model, @PathVariable String value,
+                                          @PathVariable String deletionDate)
+            throws ExecutionException, InterruptedException {
 
         Message message = messageService.findByShortURLValue(value).get();
         message.setDeletionDate(getValidTimeDate(deletionDate));
         messageService.save(message);
-
         model.addAttribute("message", message);
 
         return "get_message";
@@ -169,7 +174,9 @@ public class MessageMapping {
 
 
     @RequestMapping("/delete/{value}")
-    public String deleteMessage(Model model, @PathVariable String value) throws ExecutionException, InterruptedException {
+    public String deleteMessage(Model model, @PathVariable String value)
+            throws ExecutionException, InterruptedException {
+
         Message message = messageService.softDeleteByValue(value).get();
         model.addAttribute("message", message);
 
