@@ -41,7 +41,7 @@ public class Message {
     private Timestamp deletionDate;
 
     @OneToOne(mappedBy = "message", cascade = {DETACH, MERGE, PERSIST, REFRESH}
-            , fetch = FetchType.EAGER)
+            , fetch = FetchType.LAZY)
     private ShortURL shortURL;
 
     @JoinColumn(name = "owner_id")
