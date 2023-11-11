@@ -1,7 +1,7 @@
 package com.pastebin.service.user_details;
 
 import com.pastebin.entity.User;
-import com.pastebin.service.entityService.UserService;
+import com.pastebin.service.entity_service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;

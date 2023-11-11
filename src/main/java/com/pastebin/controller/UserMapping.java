@@ -2,7 +2,7 @@ package com.pastebin.controller;
 
 import com.pastebin.dto.UserDTO;
 import com.pastebin.entity.User;
-import com.pastebin.service.entityService.UserService;
+import com.pastebin.service.entity_service.UserService;
 import com.pastebin.service.user_details.UserDetailsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;

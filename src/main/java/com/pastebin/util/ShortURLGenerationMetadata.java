@@ -1,6 +1,6 @@
 package com.pastebin.util;
 
-import com.pastebin.service.entityService.ShortURLService;
+import com.pastebin.service.entity_service.ShortURLService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
