@@ -18,7 +18,7 @@ target/
 *.iws
 *.iml
 *.ipr
-.idea
+.idea/
 
 ### NetBeans ###
 /nbproject/private/
@@ -35,5 +35,5 @@ build/
 
 ### Custom ###
 src/main/java/com/pastebin/LoadTest.java
-data
+data/
 qodana.yaml
