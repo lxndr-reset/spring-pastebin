@@ -24,12 +24,13 @@ Get a message by its value. A GET request to `/message/get/{value}` returns the 
 
 #### GetAllUsersMessages
 
-A GET request to `/message/get/all` retrieves all the messages of a user. Ensure that the requested users' email matches the authenticated user's email.
+A GET request to `/message/get/all` retrieves all the messages of a user. Available only for registered users
 
 #### NewMessage
 
 A GET request to `/message/new/{content}/{stringDeletionDate}` creates a new message that auto-expire in validity based on the `stringDeletionDate` value. Throws `NoAvailableShortURLException` if there are no short URLs currently available.
 
+Also you can create a new messages with a from by GET request to `/message/new`
 #### EditMessageContent
 
 A GET request to `/message/edit/{value}/{content}` enables you to update an existing message's content based on its value.
@@ -54,7 +55,10 @@ A GET request to `/register` returns the registration view.
 
 #### Login
 
-A GET request to `/login` returns the login view.
+A GET request to `/login` to log in.
+
+#### Logout
+A GET request to `/logout`
 
 ### UserMapping
 
