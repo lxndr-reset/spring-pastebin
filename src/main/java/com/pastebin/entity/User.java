@@ -15,7 +15,6 @@ import java.util.Set;
 @Entity
 @Table(name = "\"user\"")
 public class User {
-    private static final Logger logger = LoggerFactory.getLogger(User.class);
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

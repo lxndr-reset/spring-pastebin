@@ -17,6 +17,11 @@ public enum ValidTime {
         return hoursDuration;
     }
 
+    /**
+     * Converts the duration in hours to a Timestamp object representing the same duration.
+     *
+     * @return a Timestamp object representing the duration in hours.
+     */
     public Timestamp toTimeStamp() {
         Calendar cal = Calendar.getInstance();
         cal.add(HOUR, this.hoursDuration);

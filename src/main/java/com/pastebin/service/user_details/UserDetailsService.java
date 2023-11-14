@@ -9,6 +9,16 @@ import org.springframework.stereotype.Service;
 
 import java.util.NoSuchElementException;
 
+/**
+ * UserDetailsService class implements the {@link org.springframework.security.core.userdetails.UserDetailsService}
+ * interface to provide user details for authentication and authorization purposes.
+ *
+ * This class is a Spring @Service component and is responsible for loading user details from the underlying
+ * {@link UserService} to be used during the authentication process.
+ *
+ * Please note that this class does not handle the logic of checking and validating user credentials, but rather
+ * focuses on loading user details for the authentication process.
+ */
 @Service
 public class UserDetailsService implements org.springframework.security.core.userdetails.UserDetailsService {
     private final UserService userService;

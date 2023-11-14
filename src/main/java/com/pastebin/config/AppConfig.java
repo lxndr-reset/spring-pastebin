@@ -47,6 +47,7 @@ public class AppConfig {
 
     @Bean
     public CacheManager cacheManager() {
+
         Caffeine<Object, Object> caffeine = Caffeine.newBuilder()
                 .expireAfterWrite(10, TimeUnit.MINUTES)
                 .executor(this.executor);
@@ -65,15 +66,20 @@ public class AppConfig {
 
     @Bean
     public DataSource dataSource() {
+
         HikariDataSource dataSource = new HikariDataSource();
+
         dataSource.setJdbcUrl(dataSourceUrl);
         dataSource.setPassword(dataSourcePassword);
         dataSource.setUsername(dataSourceUsername);
 
         //to check if connection available
         try (Connection connection = dataSource.getConnection()) {
+
         } catch (SQLException e) {
+
             throw new RuntimeException("Failed to establish DB connection", e);
+
         }
 
         return dataSource;

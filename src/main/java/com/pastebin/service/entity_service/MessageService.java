@@ -37,6 +37,13 @@ public class MessageService {
         this.userService = userService;
     }
 
+    /**
+     * Finds a message by its short URL value.
+     *
+     * @param value the short URL value to search for
+     * @return a CompletableFuture of the retrieved message if found
+     * @throws NoSuchElementException if the message is not found or is deleted
+     */
     @AvailableMessages
     @Cacheable(value = "message")
     @Async
@@ -84,7 +91,9 @@ public class MessageService {
     }
 
     /**
-     * Saves a message and creates adds a user if he is logged in
+     * Saves a message and attaches a user to the message if the user is authenticated.
+     *
+     * @param message The message to be saved.
      */
     @AvailableMessages
     @Caching(

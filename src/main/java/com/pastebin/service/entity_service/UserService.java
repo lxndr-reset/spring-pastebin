@@ -4,6 +4,7 @@ import com.pastebin.entity.User;
 import com.pastebin.repository.UserRepo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -24,7 +25,7 @@ public class UserService {
 
     public User save(User user) {
         user.setPassword(encoder.encode(user.getPassword()));
-        return userRepo.save(user);
+            return userRepo.save(user);
     }
 
     public Optional<User> findUserByEmail(String email) {

@@ -15,6 +15,7 @@ public class CheckMessageIsAvailable {
 
         if (result.getDeleted() || (result.getDeletionDate() != null
                 && result.getDeletionDate().getTime() <= System.currentTimeMillis())) {
+
             throw new NoSuchElementException("Element by link http://localhost:8080/message/get/" + result.
                     getShortURL().getUrlValue() + " was not found");
         }

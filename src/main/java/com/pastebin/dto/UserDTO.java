@@ -6,6 +6,10 @@ import java.util.Arrays;
 import java.util.Objects;
 import java.util.Set;
 
+/**
+ * UserDTO class represents a user data transfer object.
+ * It encapsulates information about a user, such as email, password, and all user messages.
+ */
 public class UserDTO {
     private String email;
     private char[] password;

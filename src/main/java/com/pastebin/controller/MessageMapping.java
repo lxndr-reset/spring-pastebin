@@ -36,23 +36,43 @@ public class MessageMapping {
         this.shortURLService = shortURLService;
     }
 
+    /**
+     * Converts a string representation of a deletion date to a ValidTime object.
+     *
+     * @param stringDeletionDate a string representing the deletion date
+     * @return the ValidTime object corresponding to the deletion date
+     * @throws IllegalArgumentException if the stringDeletionDate is invalid or not supported
+     */
     private static ValidTime getValidTimeDate(String stringDeletionDate) {
+
         try {
             return ValidTime.valueOf(stringDeletionDate);
+
         } catch (IllegalArgumentException e) {
+
             throw new IllegalArgumentException("Wrong or missing option " + stringDeletionDate +
                     ".\n Available options: " + "ONE_HOUR, ONE_DAY, ONE_WEEK, TWO_WEEKS, ONE_MONTH, THREE_MONTHS"
             );
         }
     }
 
+    /**
+     * Retrieves a message by its value from the message service and sets it as an attribute in a ModelAndView object.
+     *
+     * @param mav   the ModelAndView object to which the retrieved message will be added
+     * @param value the value of the message to be retrieved
+     * @return the ModelAndView object with the retrieved message set as an attribute
+     * @throws NoSuchElementException if a message with the given value does not exist
+     */
     @RequestMapping("/get/{value}")
     public ModelAndView getMessageByValue(ModelAndView mav, @PathVariable String value) {
+
         if (mav.getModelMap().containsAttribute("message")) {
             return mav;
         }
 
         Message message;
+
         try {
             message = messageService.findByShortURLValue(value).join();
         } catch (NoSuchElementException e) {
@@ -66,15 +86,23 @@ public class MessageMapping {
         return mav;
     }
 
+    /**
+     * Retrieves all messages for the authenticated user, if available, and sets the user as an attribute in the Model object.
+     *
+     * @param model the Model object to which the user will be added
+     * @return the name of the view to be rendered for displaying all messages
+     * @throws AuthenticationException if the user is not authenticated
+     */
     @RequestMapping("/get/all")
     public String getAllUsersMessages(Model model) throws AuthenticationException {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         UserDetails details = (UserDetails) authentication.getPrincipal();
+
         String email = details.getUsername();
 
         if (!email.equalsIgnoreCase("anonymousUser")) {
-            model.addAttribute("user", createTransferUserByEmail(email)); //todo refactor all model attributes from user to userDTO
+            model.addAttribute("user", createTransferUserByEmail(email));
             return "get_all_messages";
         }
 
@@ -82,9 +110,12 @@ public class MessageMapping {
     }
 
     private User createTransferUserByEmail(String email) {
+
         User transferUser = new User();
         transferUser.setEmail(email);
-        transferUser.setAllUsersMessages(messageService.getMessagesByUser_Email(email));
+        transferUser.setAllUsersMessages(
+                messageService.getMessagesByUser_Email(email)
+        );
 
         return transferUser;
     }
@@ -93,6 +124,7 @@ public class MessageMapping {
     @RequestMapping("/new/{content}/{stringDeletionDate}")
     public ModelAndView newMessage(ModelAndView modelAndView, @PathVariable String content,
                                    @PathVariable String stringDeletionDate) {
+
         Message message = new Message(content,
                 shortURLService.getAvailableShortURL(),
                 getValidTimeDate(stringDeletionDate)
@@ -102,28 +134,54 @@ public class MessageMapping {
     }
 
 
+    /**
+     * Renders a form for creating a new message and sets an empty Message object as a model attribute.
+     *
+     * @param modelAndView the ModelAndView object to be used for rendering the view
+     * @return the ModelAndView object representing the view for creating a new message
+     */
     @RequestMapping(value = "/new")
     public ModelAndView newMessage(ModelAndView modelAndView) {
+
         modelAndView.setViewName("new_message");
         modelAndView.getModelMap().addAttribute("message", new Message());
 
         return modelAndView;
     }
 
+    /**
+     * Submits a new message by setting the deletion date, generating a short URL, and persisting the message.
+     * The message object is passed as a model attribute and the ModelAndView object is returned.
+     *
+     * @param message the Message object containing the message details
+     * @param modelAndView the ModelAndView object to be returned
+     * @return the ModelAndView object containing the persisted message
+     */
     @RequestMapping(value = "/submit", method = RequestMethod.POST)
     public ModelAndView submitMessage(@ModelAttribute("message") Message message,
                                       ModelAndView modelAndView) {
+
         assert message != null;
 
         if (message.getDeletionDateText() != null){
             message.setDeletionDate(message.getDeletionDateText());
         }
+
         message.setShortURL(shortURLService.getAvailableShortURL());
 
         return persistMessageAndGetMAV(message, modelAndView);
     }
+    /**
+     * Persists the given message and returns the updated ModelAndView object.
+     *
+     * @param message the Message object to be persisted
+     * @param modelAndView the ModelAndView object to be updated
+     * @return the ModelAndView object after persisting the message
+     */
     private ModelAndView persistMessageAndGetMAV(Message message, ModelAndView modelAndView) {
+
         messageService.save(message);
+
         modelAndView.setViewName(
                 "redirect:/message/get/" + message.getShortURL().getUrlValue()
         );
@@ -136,7 +194,9 @@ public class MessageMapping {
             throws ExecutionException, InterruptedException {
 
         Message message = messageService.findByShortURLValue(value).get();
+
         message.setValue(content);
+
         messageService.save(message);
 
         model.addAttribute("message", message);
@@ -144,20 +204,34 @@ public class MessageMapping {
         return "get_message";
     }
 
+    /**
+     * Edits the content and deletion date of a message and returns the corresponding view name.
+     *
+     * @param model         the Model object to add attributes to
+     * @param value         the value of the short URL associated with the message
+     * @param content       the new content of the message
+     * @param deletionDate  the new deletion date of the message
+     * @return the view name for displaying the updated message
+     * @throws ExecutionException     if an error occurs during execution
+     * @throws InterruptedException if the thread is interrupted while waiting for the message retrieval
+     */
     @RequestMapping("/edit/{value}/{content}/{deletionDate}")
     public String editMessageContentAndDeletionDate(Model model, @PathVariable String value,
                                                     @PathVariable String content, @PathVariable String deletionDate)
             throws ExecutionException, InterruptedException {
 
         Message message = messageService.findByShortURLValue(value).get();
+
         message.setValue(content);
         message.setDeletionDate(getValidTimeDate(deletionDate));
+
         messageService.save(message);
 
         model.addAttribute("message", message);
 
         return "get_message";
     }
+
 
     @RequestMapping("/edit-time/{value}/{deletionDate}")
     public String editMessageDeletionDate(Model model, @PathVariable String value,
@@ -165,8 +239,13 @@ public class MessageMapping {
             throws ExecutionException, InterruptedException {
 
         Message message = messageService.findByShortURLValue(value).get();
-        message.setDeletionDate(getValidTimeDate(deletionDate));
+
+        message.setDeletionDate(
+                getValidTimeDate(deletionDate)
+        );
+
         messageService.save(message);
+
         model.addAttribute("message", message);
 
         return "get_message";
@@ -178,6 +257,7 @@ public class MessageMapping {
             throws ExecutionException, InterruptedException {
 
         Message message = messageService.softDeleteByValue(value).get();
+
         model.addAttribute("message", message);
 
         return "get_message";

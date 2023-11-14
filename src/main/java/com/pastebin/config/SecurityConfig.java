@@ -11,6 +11,7 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.core.session.SessionRegistry;
 import org.springframework.security.core.session.SessionRegistryImpl;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationFailureHandler;
@@ -41,21 +42,24 @@ public class SecurityConfig {
 
     @Bean
     public ConcurrentSessionControlAuthenticationStrategy concurrentSessionControlAuthenticationStrategy() {
-        ConcurrentSessionControlAuthenticationStrategy concurrentSessionControlAuthenticationStrategy =
+
+        ConcurrentSessionControlAuthenticationStrategy authenticationStrategy =
                 new ConcurrentSessionControlAuthenticationStrategy(sessionRegistry());
 
-        concurrentSessionControlAuthenticationStrategy.setMaximumSessions(1);
+        authenticationStrategy.setMaximumSessions(1);
 
-        return concurrentSessionControlAuthenticationStrategy;
+        return authenticationStrategy;
     }
 
     @Bean
     public MvcRequestMatcher.Builder mvc() {
-        return new MvcRequestMatcher.Builder(getHandlerMappingIntrospector());
+        return new MvcRequestMatcher.Builder(
+                getHandlerMappingIntrospector()
+        );
     }
 
     @Bean
-    public BCryptPasswordEncoder passwordEncoder() {
+    public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
 
@@ -66,16 +70,19 @@ public class SecurityConfig {
     }
 
     @Bean
-    public AuthenticationProvider authenticationProvider() {
+    public AuthenticationProvider authenticationProvider(PasswordEncoder passwordEncoder) {
         DaoAuthenticationProvider authenticationProvider = new DaoAuthenticationProvider();
-        authenticationProvider.setPasswordEncoder(passwordEncoder());
+
+        authenticationProvider.setPasswordEncoder(passwordEncoder);
         authenticationProvider.setUserDetailsService(userDetailsService);
 
         return authenticationProvider;
     }
 
     @Bean
-    public SecurityFilterChain filterChain(HttpSecurity httpSecurity) throws Exception {
+    public SecurityFilterChain filterChain(HttpSecurity httpSecurity, AuthenticationProvider authenticationProvider)
+            throws Exception {
+
         httpSecurity.authorizeHttpRequests(urlPatterns -> urlPatterns
                         .requestMatchers(
                                 mvc().pattern("/admin/**")
@@ -93,10 +100,12 @@ public class SecurityConfig {
                     sessions.maximumSessions(1);
                     sessions.sessionAuthenticationStrategy(concurrentSessionControlAuthenticationStrategy());
                 })
-                .authenticationProvider(authenticationProvider())
+
+                .authenticationProvider(authenticationProvider)
                 .logout(Customizer.withDefaults())
                 .formLogin(Customizer.withDefaults())
                 .csrf(Customizer.withDefaults());
+
         return httpSecurity.build();
     }
 }

@@ -20,6 +20,7 @@ import java.util.concurrent.ExecutionException;
 @ControllerAdvice
 public class GlobalExceptionHandler {
     private static final Logger LOGGER = LoggerFactory.getLogger(GlobalExceptionHandler.class);
+    private static final String ERROR_VIEW_NAME = "error_page";
 
     @ExceptionHandler(NotAuthenticatedException.class)
     public String notAuthenticated() {
@@ -29,36 +30,52 @@ public class GlobalExceptionHandler {
     @ExceptionHandler({NoSuchElementException.class, MessageDeletedException.class,
             NoAvailableShortURLException.class, UrlNotExistsException.class,
             UserBlockedException.class, IllegalArgumentException.class,
-            SecurityException.class, AccessDeniedException.class, ExecutionException.class
+            SecurityException.class, AccessDeniedException.class, ExecutionException.class,
+            Exception.class //
     })
     public ModelAndView handleError(Model model, Exception exception) {
-        addExceptionAttributesToModel(model, exception);
 
         ModelAndView mav = new ModelAndView();
-        mav.setStatus(HttpStatus.INTERNAL_SERVER_ERROR);
-        mav.setViewName("error_page");
+
+        if(exception != null){
+            LOGGER.error("Unknown error occurred", exception);
+        }
+
+        assert exception != null;
+        addExceptionAttributesToModel(model, exception);
+
+        mav.setViewName(ERROR_VIEW_NAME);
+        mav.setStatus(getStatusCodeByExceptionType(exception));
+
         return mav;
     }
 
     private void addExceptionAttributesToModel(Model model, Exception exception) {
-        List<String> stackTrace = Arrays.stream(exception.getStackTrace())
-                .map(StackTraceElement::toString)
-                .collect(Collectors.toList());
+
         model.addAttribute("message", exception.getMessage());
         model.addAttribute("currentTime", LocalDateTime.now().toString());
         model.addAttribute("exceptionName", exception.getClass().getName());
-        model.addAttribute("stack_trace", stackTrace);
+        model.addAttribute("stack_trace", convertStackTraceToString(exception.getStackTrace()));
+
     }
 
-    @ExceptionHandler(Exception.class)
-    public ModelAndView handleOtherExceptions(Model model, Exception exception) {
-        addExceptionAttributesToModel(model, exception);
+    // New methods for refactoring
+    private HttpStatus getStatusCodeByExceptionType(Exception exception) {
 
-        ModelAndView mav = new ModelAndView();
-        mav.setViewName("error_page");
+        if (exception instanceof AccessDeniedException || exception instanceof UserBlockedException) {
+            return HttpStatus.FORBIDDEN;
+        }
 
-        LOGGER.error("Unknown error occurred", exception);
+        if (exception instanceof NotAuthenticatedException) {
+            return HttpStatus.UNAUTHORIZED;
+        }
 
-        return mav;
+        return HttpStatus.INTERNAL_SERVER_ERROR;
+    }
+
+    private List<String> convertStackTraceToString(StackTraceElement[] stackTraceElements) {
+        return Arrays.stream(stackTraceElements)
+                .map(StackTraceElement::toString)
+                .collect(Collectors.toList());
     }
 }

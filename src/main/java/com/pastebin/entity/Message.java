@@ -20,14 +20,6 @@ public class Message {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    public String getDeletionDateText() {
-        return deletionDateText;
-    }
-
-    public void setDeletionDateText(String deletionDateText) {
-        this.deletionDateText = deletionDateText;
-    }
-
     @Transient
     private String deletionDateText;
 
@@ -45,7 +37,7 @@ public class Message {
     private ShortURL shortURL;
 
     @JoinColumn(name = "owner_id")
-    @ManyToOne(fetch = FetchType.LAZY, cascade = {DETACH, MERGE, PERSIST, REFRESH})
+    @ManyToOne(fetch = FetchType.LAZY, cascade = {DETACH, PERSIST, REFRESH})
     private User user;
 
     public Message() {
@@ -62,6 +54,7 @@ public class Message {
         url.setMessage(this);
         this.setDeletionDate(deletionDate);
     }
+
     public Message(String value, ShortURL url, String deletionDateText) {
         this.value = value;
         this.shortURL = url;
@@ -70,11 +63,19 @@ public class Message {
     }
 
     @VisibleForTesting
-    public Message(String value , ShortURL shortURL, Timestamp deletionDate) {
+    public Message(String value, ShortURL shortURL, Timestamp deletionDate) {
         this.value = value;
         this.deletionDate = deletionDate;
-        this.shortURL = shortURL;
         shortURL.setMessage(this);
+        this.shortURL = shortURL;
+    }
+
+    public String getDeletionDateText() {
+        return deletionDateText;
+    }
+
+    public void setDeletionDateText(String deletionDateText) {
+        this.deletionDateText = deletionDateText;
     }
 
     public User getUser() {
@@ -157,6 +158,13 @@ public class Message {
         this.deletionDate = delete_date;
     }
 
+    /**
+     * Sets the deletion date for the object.
+     *
+     * @param string the string representation of the deletion date.
+     *               Must be a valid format recognized by the ValidTime.valueOf() method.
+     *               For example, "2021-12-31T23:59:59".
+     */
     public void setDeletionDate(String string) {
         this.deletionDate = ValidTime.valueOf(string).toTimeStamp();
     }

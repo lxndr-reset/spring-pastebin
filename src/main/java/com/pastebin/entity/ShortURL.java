@@ -33,11 +33,6 @@ public class ShortURL {
         this.urlValue = urlValue;
     }
 
-    public ShortURL(String urlValue, Message message) {
-        this.urlValue = urlValue;
-        this.message = message;
-        message.setShortURL(this);
-    }
 
     public static long getLastGeneratedAmount() {
         return ShortURLGenerationMetadata.getGenerationValue();

@@ -17,7 +17,9 @@ public class AsyncConfigurer {
 
     @Bean
     public Executor executor() {
+
         ExecutorService executorService = Executors.newCachedThreadPool();
+
         logger.debug("Logger was created: {}", executorService);
 
         return executorService;

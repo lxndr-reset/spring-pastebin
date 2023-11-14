@@ -5,29 +5,28 @@ import com.pastebin.service.entity_service.MessageService;
 import com.pastebin.service.entity_service.ShortURLService;
 import com.pastebin.util.ShortURLValueGenerator;
 import org.hibernate.annotations.BatchSize;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.io.BufferedReader;
-import java.io.FileReader;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 @Component
 public class ScheduledOperations {
     private final MessageService messageService;
     private final ShortURLService shortURLService;
+    private final Logger logger = LoggerFactory.getLogger(ScheduledOperations.class);
     private boolean isDeletingRunning = false;
 
     @Autowired
@@ -36,16 +35,35 @@ public class ScheduledOperations {
         this.shortURLService = shortURLService;
     }
 
+    private static int getGenerationAmount() {
+        return (int) Math.round(ShortURL.getLastGeneratedAmount() * ShortURL.getMultiplier());
+    }
+
+    private static List<CompletableFuture<Void>> getListOfShortURlFutures(String lastGeneratedValue, int valuesToGenerate, List<ShortURL> linkValues) {
+        List<CompletableFuture<Void>> futures = ShortURLValueGenerator.generate(lastGeneratedValue,
+                        valuesToGenerate)
+                .stream()
+                .map(seq -> CompletableFuture.supplyAsync(() ->
+                        new ShortURL(new String(seq))).thenAcceptAsync(linkValues::add))
+                .toList();
+        return futures;
+    }
+
+    /**
+     * This method is scheduled to run at fixed intervals of 3 days. It is responsible for deleting messages from the database.
+     * It is annotated with @Scheduled
+     */
     @Scheduled(fixedDelay = 3, timeUnit = TimeUnit.DAYS)
     @Transactional
     @BatchSize(size = 500)
     public void finalDeleteMessages() {
+
         if (!isDeletingRunning) {
             isDeletingRunning = true;
             messageService.deleteAllByDeletedIsTrueOrDeletionDateIsGreaterThanEqual();
             isDeletingRunning = false;
 
-            System.out.println(getDateTime() + "Messages were removed from database");
+            logger.trace(getDateTime() + "Messages were removed from database");
         }
     }
 
@@ -61,54 +79,42 @@ public class ScheduledOperations {
             , timeUnit = TimeUnit.HOURS)
     @Transactional
     public void generateLinkValue() {
+
         try {
+
             if (!isEnoughLinksAvailable()) {
                 generateLinks();
             }
+
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
     }
 
-
-
     public void generateLinkValueWithoutCheck() {
         generateLinks();
     }
 
-    protected void generateLinks() {
-        int valuesToGenerateAmount = (int) Math.round(ShortURL.getLastGeneratedAmount() * ShortURL.getMultiplier());
+    public void generateLinks() {
+        int valuesToGenerate = getGenerationAmount();
         List<ShortURL> linkValues = Collections.synchronizedList(new ArrayList<>());
 
-        try (ExecutorService executor = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors())) {
-            String lastGeneratedValue = ShortURL.getLastGeneratedValue();
-            List<CompletableFuture<Void>> futures = ShortURLValueGenerator.generate(lastGeneratedValue,
-                            valuesToGenerateAmount)
-                    .stream()
-                    .map(seq -> CompletableFuture.supplyAsync(() ->
-                            new ShortURL(new String(seq)), executor).thenAcceptAsync(linkValues::add))
-                    .toList();
+        String lastGeneratedValue = ShortURL.getLastGeneratedValue();
 
-            CompletableFuture.allOf(futures.toArray(new CompletableFuture[0])).join();
-            executor.shutdown();
-        }
+        List<CompletableFuture<Void>> futures = getListOfShortURlFutures(
+                lastGeneratedValue, valuesToGenerate, linkValues
+        );
 
-        System.out.println(getDateTime() + "Unique URLs were generated");
+        CompletableFuture.allOf(futures.toArray(new CompletableFuture[0])).join();
+
+        logger.info("Unique URLs were generated in amount of {}", valuesToGenerate);
 
         shortURLService.saveAll(linkValues);
     }
 
-    private String getMaxString(List<ShortURL> list) {
-        return list.stream().max(Comparator.comparing(ShortURL::getUrlValue)).orElseThrow(() ->
-                        new RuntimeException("Error in generating unique links. Please contact administrator"))
-                .getUrlValue();
-    }
 
-    protected boolean isEnoughLinksAvailable() throws IOException {
-        try (BufferedReader reader = new BufferedReader(new FileReader("src/main/resources/last_generated_amount.txt"))) {
-            long lastGeneratedAmount = Long.parseLong(reader.readLine());
-            return lastGeneratedAmount >> 2 >= shortURLService.countAllByMessageNull();
-        }
+    private boolean isEnoughLinksAvailable() throws IOException {
+        return getGenerationAmount() >> 2 >= shortURLService.countAllByMessageNull();
     }
 
     /**
