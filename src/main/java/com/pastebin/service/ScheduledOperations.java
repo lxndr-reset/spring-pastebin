@@ -53,7 +53,7 @@ public class ScheduledOperations {
      * This method is scheduled to run at fixed intervals of 3 days. It is responsible for deleting messages from the database.
      * It is annotated with @Scheduled
      */
-    @Scheduled(fixedDelay = 3, timeUnit = TimeUnit.DAYS)
+    @Scheduled(fixedDelay = 3, initialDelay = 3, timeUnit = TimeUnit.DAYS)
     @Transactional
     @BatchSize(size = 500)
     public void finalDeleteMessages() {
