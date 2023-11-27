@@ -103,7 +103,7 @@ public class MessageService {
     public void save(Message message) {
         attachUserToMessageIfAuthenticated(message);
 
-        messageRepo.save(message);
+        messageRepo.save(message); // todo Message: detached entity passed to persist: com.pastebin.entity.Message
     }
 
     private void attachUserToMessageIfAuthenticated(Message message) {
