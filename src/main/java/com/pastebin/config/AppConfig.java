@@ -12,7 +12,6 @@ import org.springframework.cache.caffeine.CaffeineCacheManager;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
-import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 
 import javax.sql.DataSource;
@@ -24,10 +23,8 @@ import java.util.concurrent.TimeUnit;
 @Configuration
 @EnableWebMvc
 @EnableCaching
-@EnableAsync
 @PropertySource("classpath:application-${spring.profiles.active}.properties")
 public class AppConfig {
-
     private final Executor executor;
 
     @Value("${spring.datasource.url}")
@@ -79,7 +76,6 @@ public class AppConfig {
         } catch (SQLException e) {
 
             throw new RuntimeException("Failed to establish DB connection", e);
-
         }
 
         return dataSource;
