@@ -59,7 +59,6 @@ public class GlobalExceptionHandler {
 
     }
 
-    // New methods for refactoring
     private HttpStatus getStatusCodeByExceptionType(Exception exception) {
 
         if (exception instanceof AccessDeniedException || exception instanceof UserBlockedException) {

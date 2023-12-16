@@ -13,10 +13,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
 
 import javax.naming.AuthenticationException;
@@ -24,7 +21,7 @@ import java.util.NoSuchElementException;
 import java.util.concurrent.ExecutionException;
 
 @Controller
-@RequestMapping("/message")
+@RequestMapping(value = "/message")
 public class MessageMapping {
     private final MessageService messageService;
     private final ShortURLService shortURLService;
@@ -64,7 +61,7 @@ public class MessageMapping {
      * @return the ModelAndView object with the retrieved message set as an attribute
      * @throws NoSuchElementException if a message with the given value does not exist
      */
-    @RequestMapping("/get/{value}")
+    @GetMapping("/get/{value}")
     public ModelAndView getMessageByValue(ModelAndView mav, @PathVariable String value) {
 
         if (mav.getModelMap().containsAttribute("message")) {
@@ -93,7 +90,7 @@ public class MessageMapping {
      * @return the name of the view to be rendered for displaying all messages
      * @throws AuthenticationException if the user is not authenticated
      */
-    @RequestMapping("/get/all")
+    @GetMapping("/get/all")
     public String getAllUsersMessages(Model model) throws AuthenticationException {
 
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -121,7 +118,7 @@ public class MessageMapping {
     }
 
 
-    @RequestMapping("/new/{content}/{stringDeletionDate}")
+    @GetMapping("/new/{content}/{stringDeletionDate}")
     public ModelAndView newMessage(ModelAndView modelAndView, @PathVariable String content,
                                    @PathVariable String stringDeletionDate) {
 
@@ -140,7 +137,7 @@ public class MessageMapping {
      * @param modelAndView the ModelAndView object to be used for rendering the view
      * @return the ModelAndView object representing the view for creating a new message
      */
-    @RequestMapping(value = "/new")
+    @GetMapping(value = "/new")
     public ModelAndView newMessage(ModelAndView modelAndView) {
 
         modelAndView.setViewName("new_message");
@@ -153,17 +150,17 @@ public class MessageMapping {
      * Submits a new message by setting the deletion date, generating a short URL, and persisting the message.
      * The message object is passed as a model attribute and the ModelAndView object is returned.
      *
-     * @param message the Message object containing the message details
+     * @param message      the Message object containing the message details
      * @param modelAndView the ModelAndView object to be returned
      * @return the ModelAndView object containing the persisted message
      */
-    @RequestMapping(value = "/submit", method = RequestMethod.POST)
+    @PostMapping(value = "/submit")
     public ModelAndView submitMessage(@ModelAttribute("message") Message message,
                                       ModelAndView modelAndView) {
 
         assert message != null;
 
-        if (message.getDeletionDateText() != null){
+        if (message.getDeletionDateText() != null) {
             message.setDeletionDate(message.getDeletionDateText());
         }
 
@@ -171,10 +168,11 @@ public class MessageMapping {
 
         return persistMessageAndGetMAV(message, modelAndView);
     }
+
     /**
      * Persists the given message and returns the updated ModelAndView object.
      *
-     * @param message the Message object to be persisted
+     * @param message      the Message object to be persisted
      * @param modelAndView the ModelAndView object to be updated
      * @return the ModelAndView object after persisting the message
      */
@@ -189,7 +187,7 @@ public class MessageMapping {
         return modelAndView;
     }
 
-    @RequestMapping("/edit/{value}/{content}")
+    @GetMapping("/edit/{value}/{content}")
     public String editMessageContent(Model model, @PathVariable String value, @PathVariable String content)
             throws ExecutionException, InterruptedException {
 
@@ -207,15 +205,15 @@ public class MessageMapping {
     /**
      * Edits the content and deletion date of a message and returns the corresponding view name.
      *
-     * @param model         the Model object to add attributes to
-     * @param value         the value of the short URL associated with the message
-     * @param content       the new content of the message
-     * @param deletionDate  the new deletion date of the message
+     * @param model        the Model object to add attributes to
+     * @param value        the value of the short URL associated with the message
+     * @param content      the new content of the message
+     * @param deletionDate the new deletion date of the message
      * @return the view name for displaying the updated message
-     * @throws ExecutionException     if an error occurs during execution
+     * @throws ExecutionException   if an error occurs during execution
      * @throws InterruptedException if the thread is interrupted while waiting for the message retrieval
      */
-    @RequestMapping("/edit/{value}/{content}/{deletionDate}")
+    @GetMapping("/edit/{value}/{content}/{deletionDate}")
     public String editMessageContentAndDeletionDate(Model model, @PathVariable String value,
                                                     @PathVariable String content, @PathVariable String deletionDate)
             throws ExecutionException, InterruptedException {
@@ -233,7 +231,7 @@ public class MessageMapping {
     }
 
 
-    @RequestMapping("/edit-time/{value}/{deletionDate}")
+    @GetMapping("/edit-time/{value}/{deletionDate}")
     public String editMessageDeletionDate(Model model, @PathVariable String value,
                                           @PathVariable String deletionDate)
             throws ExecutionException, InterruptedException {
@@ -252,7 +250,7 @@ public class MessageMapping {
     }
 
 
-    @RequestMapping("/delete/{value}")
+    @GetMapping("/delete/{value}")
     public String deleteMessage(Model model, @PathVariable String value)
             throws ExecutionException, InterruptedException {
 
