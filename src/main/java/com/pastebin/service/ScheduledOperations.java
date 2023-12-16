@@ -36,7 +36,7 @@ public class ScheduledOperations {
     }
 
     private static int getGenerationAmount() {
-        return (int) Math.round(ShortURL.getLastGeneratedAmount() * ShortURL.getMultiplier());
+        return (int) ShortURL.getLastGeneratedAmount();
     }
 
     private static List<CompletableFuture<Void>> getListOfShortURlFutures(String lastGeneratedValue, int valuesToGenerate, List<ShortURL> linkValues) {
