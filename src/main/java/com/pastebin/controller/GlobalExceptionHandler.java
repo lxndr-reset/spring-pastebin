@@ -5,7 +5,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.AccessDeniedException;
-import org.springframework.ui.Model;
+import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.servlet.ModelAndView;
@@ -14,8 +14,8 @@ import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
 import java.util.NoSuchElementException;
-import java.util.stream.Collectors;
 import java.util.concurrent.ExecutionException;
+import java.util.stream.Collectors;
 
 @ControllerAdvice
 public class GlobalExceptionHandler {
@@ -31,26 +31,25 @@ public class GlobalExceptionHandler {
             NoAvailableShortURLException.class, UrlNotExistsException.class,
             UserBlockedException.class, IllegalArgumentException.class,
             SecurityException.class, AccessDeniedException.class, ExecutionException.class,
-            Exception.class //
+            Exception.class
     })
-    public ModelAndView handleError(Model model, Exception exception) {
+    public ModelAndView handleError(ModelAndView modelAndView, Exception exception) {
 
-        ModelAndView mav = new ModelAndView();
 
-        if(exception != null){
+        if (exception != null) {
             LOGGER.error("Unknown error occurred", exception);
         }
 
         assert exception != null;
-        addExceptionAttributesToModel(model, exception);
+        addExceptionAttributesToModel(modelAndView.getModelMap(), exception);
 
-        mav.setViewName(ERROR_VIEW_NAME);
-        mav.setStatus(getStatusCodeByExceptionType(exception));
+        modelAndView.setViewName(ERROR_VIEW_NAME);
+        modelAndView.setStatus(getStatusCodeByExceptionType(exception));
 
-        return mav;
+        return modelAndView;
     }
 
-    private void addExceptionAttributesToModel(Model model, Exception exception) {
+    private void addExceptionAttributesToModel(ModelMap model, Exception exception) {
 
         model.addAttribute("message", exception.getMessage());
         model.addAttribute("currentTime", LocalDateTime.now().toString());

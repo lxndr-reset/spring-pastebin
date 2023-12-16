@@ -1,5 +1,6 @@
 package com.pastebin.util;
 
+import com.pastebin.entity.ShortURL;
 import com.pastebin.service.entity_service.ShortURLService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -22,7 +23,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class ShortURLGenerationMetadata {
     private static ShortURLService shortURLService;
-    private final static double GENERATION_MULTIPLIER = 0.15;
+    private final static double GENERATION_MULTIPLIER = ShortURL.getMultiplier();
 
     @Autowired
     public ShortURLGenerationMetadata(ShortURLService shortURLService) {
@@ -31,7 +32,7 @@ public class ShortURLGenerationMetadata {
 
     public static String getLastGeneratedSequence() {
         return shortURLService.getLastGeneratedSequence()
-                .orElse("a"); //When table is empty
+                .orElse("a"); //When the table is empty
     }
 
     public static long getGenerationValue() {

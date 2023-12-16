@@ -85,7 +85,9 @@ public class SecurityConfig {
 
         httpSecurity.authorizeHttpRequests(urlPatterns -> urlPatterns
                         .requestMatchers(
-                                mvc().pattern("/admin/**")
+                                mvc().pattern("/messages/**"),
+                                mvc().pattern("/shorturls/**"),
+                                mvc().pattern("/users/**")
                         ).hasRole("ADMIN")
 
                         .requestMatchers(

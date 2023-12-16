@@ -11,8 +11,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
 
@@ -20,7 +18,7 @@ import javax.naming.AuthenticationException;
 import java.util.NoSuchElementException;
 import java.util.concurrent.ExecutionException;
 
-@Controller
+@RestController
 @RequestMapping(value = "/message")
 public class MessageMapping {
     private final MessageService messageService;
@@ -86,12 +84,12 @@ public class MessageMapping {
     /**
      * Retrieves all messages for the authenticated user, if available, and sets the user as an attribute in the Model object.
      *
-     * @param model the Model object to which the user will be added
+     * @param modelAndView the ModelAndView object to which the user will be added
      * @return the name of the view to be rendered for displaying all messages
      * @throws AuthenticationException if the user is not authenticated
      */
     @GetMapping("/get/all")
-    public String getAllUsersMessages(Model model) throws AuthenticationException {
+    public ModelAndView getAllUsersMessages(ModelAndView modelAndView) throws AuthenticationException {
 
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         UserDetails details = (UserDetails) authentication.getPrincipal();
@@ -99,8 +97,9 @@ public class MessageMapping {
         String email = details.getUsername();
 
         if (!email.equalsIgnoreCase("anonymousUser")) {
-            model.addAttribute("user", createTransferUserByEmail(email));
-            return "get_all_messages";
+            modelAndView.getModelMap().addAttribute("user", createTransferUserByEmail(email));
+            modelAndView.setViewName("get_all_messages");
+            return modelAndView;
         }
 
         throw new AuthenticationException("You are not authorized");
@@ -158,13 +157,10 @@ public class MessageMapping {
     public ModelAndView submitMessage(@ModelAttribute("message") Message message,
                                       ModelAndView modelAndView) {
 
-        assert message != null;
-
-        if (message.getDeletionDateText() != null) {
+        if (message != null && message.getDeletionDateText() != null) {
             message.setDeletionDate(message.getDeletionDateText());
+            message.setShortURL(shortURLService.getAvailableShortURL());
         }
-
-        message.setShortURL(shortURLService.getAvailableShortURL());
 
         return persistMessageAndGetMAV(message, modelAndView);
     }
@@ -188,7 +184,7 @@ public class MessageMapping {
     }
 
     @GetMapping("/edit/{value}/{content}")
-    public String editMessageContent(Model model, @PathVariable String value, @PathVariable String content)
+    public ModelAndView editMessageContent(ModelAndView modelAndView, @PathVariable String value, @PathVariable String content)
             throws ExecutionException, InterruptedException {
 
         Message message = messageService.findByShortURLValue(value).get();
@@ -197,15 +193,16 @@ public class MessageMapping {
 
         messageService.save(message);
 
-        model.addAttribute("message", message);
+        modelAndView.getModelMap().addAttribute("message", message);
+        modelAndView.setViewName("get_message");
 
-        return "get_message";
+        return modelAndView;
     }
 
     /**
      * Edits the content and deletion date of a message and returns the corresponding view name.
      *
-     * @param model        the Model object to add attributes to
+     * @param modelAndView the ModelAndVie object to add attributes and view to
      * @param value        the value of the short URL associated with the message
      * @param content      the new content of the message
      * @param deletionDate the new deletion date of the message
@@ -214,8 +211,8 @@ public class MessageMapping {
      * @throws InterruptedException if the thread is interrupted while waiting for the message retrieval
      */
     @GetMapping("/edit/{value}/{content}/{deletionDate}")
-    public String editMessageContentAndDeletionDate(Model model, @PathVariable String value,
-                                                    @PathVariable String content, @PathVariable String deletionDate)
+    public ModelAndView editMessageContentAndDeletionDate(ModelAndView modelAndView, @PathVariable String value,
+                                                          @PathVariable String content, @PathVariable String deletionDate)
             throws ExecutionException, InterruptedException {
 
         Message message = messageService.findByShortURLValue(value).get();
@@ -225,15 +222,16 @@ public class MessageMapping {
 
         messageService.save(message);
 
-        model.addAttribute("message", message);
+        modelAndView.getModelMap().addAttribute("message", message);
+        modelAndView.setViewName("get_message");
 
-        return "get_message";
+        return modelAndView;
     }
 
 
     @GetMapping("/edit-time/{value}/{deletionDate}")
-    public String editMessageDeletionDate(Model model, @PathVariable String value,
-                                          @PathVariable String deletionDate)
+    public ModelAndView editMessageDeletionDate(ModelAndView modelAndView, @PathVariable String value,
+                                                @PathVariable String deletionDate)
             throws ExecutionException, InterruptedException {
 
         Message message = messageService.findByShortURLValue(value).get();
@@ -244,21 +242,23 @@ public class MessageMapping {
 
         messageService.save(message);
 
-        model.addAttribute("message", message);
+        modelAndView.getModelMap().addAttribute("message", message);
+        modelAndView.setViewName("get_message");
 
-        return "get_message";
+        return modelAndView;
     }
 
 
     @GetMapping("/delete/{value}")
-    public String deleteMessage(Model model, @PathVariable String value)
+    public ModelAndView deleteMessage(ModelAndView modelAndView, @PathVariable String value)
             throws ExecutionException, InterruptedException {
 
         Message message = messageService.softDeleteByValue(value).get();
 
-        model.addAttribute("message", message);
+        modelAndView.getModelMap().addAttribute("message", message);
+        modelAndView.setViewName("get_message");
 
-        return "get_message";
+        return modelAndView;
     }
 
 }

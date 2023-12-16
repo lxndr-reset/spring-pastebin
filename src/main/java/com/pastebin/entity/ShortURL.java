@@ -3,6 +3,8 @@ package com.pastebin.entity;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.pastebin.util.ShortURLGenerationMetadata;
 import jakarta.persistence.*;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import java.util.Objects;
 

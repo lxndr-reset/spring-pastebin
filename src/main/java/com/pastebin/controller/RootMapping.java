@@ -1,11 +1,11 @@
 package com.pastebin.controller;
 
 import com.pastebin.dto.UserDTO;
-import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.servlet.ModelAndView;
 
-@Controller
+@RestController
 public class RootMapping {
 
     /**
@@ -16,13 +16,14 @@ public class RootMapping {
      * <p>
      * After registration, you will be redirected on login page, where you can use registered credentials
      *
-     * @param model the model object used to pass data to the view
+     * @param modelAndView the model and view object used to pass data to the view
      * @return the view name for the registration page
      */
     @GetMapping(value = "/register")
-    public String register(Model model) {
-        model.addAttribute("user_dto", new UserDTO());
+    public ModelAndView register(ModelAndView modelAndView) {
+        modelAndView.getModelMap().addAttribute("user_dto", new UserDTO());
+        modelAndView.setViewName("registration");
 
-        return "registration";
+        return modelAndView;
     }
 }
