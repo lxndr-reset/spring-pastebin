@@ -20,13 +20,13 @@ import java.util.concurrent.ExecutionException;
 
 @RestController
 @RequestMapping(value = "/message")
-public class MessageMapping {
+public class MessageController {
     private final MessageService messageService;
     private final ShortURLService shortURLService;
-    private final Logger logger = LoggerFactory.getLogger(MessageMapping.class);
+    private final Logger logger = LoggerFactory.getLogger(MessageController.class);
 
     @Autowired
-    public MessageMapping(MessageService messageService, ShortURLService shortURLService) {
+    public MessageController(MessageService messageService, ShortURLService shortURLService) {
         this.messageService = messageService;
         this.shortURLService = shortURLService;
     }

@@ -23,7 +23,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @AutoConfigureMockMvc
 @SpringBootTest
-class MessageMappingTest {
+class MessageControllerTest {
     @Autowired
     private MockMvc mockMVC;
 

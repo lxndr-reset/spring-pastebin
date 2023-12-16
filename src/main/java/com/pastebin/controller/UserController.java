@@ -17,12 +17,12 @@ import org.springframework.web.servlet.ModelAndView;
 
 @RestController
 @RequestMapping("/user")
-public class UserMapping {
+public class UserController {
     private final UserService userService;
     private final UserDetailsService userDetailsService;
 
     @Autowired
-    public UserMapping(UserService userService, UserDetailsService userDetailsService) {
+    public UserController(UserService userService, UserDetailsService userDetailsService) {
         this.userService = userService;
         this.userDetailsService = userDetailsService;
     }
